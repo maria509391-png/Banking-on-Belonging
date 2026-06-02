@@ -27,7 +27,7 @@
 
     #sidebar-header {
       padding: 22px 20px 18px;
-      background: #1a1a2e;
+      background: linear-gradient(135deg, #6366F1, #A855F7);
       flex-shrink: 0;
     }
 
@@ -48,7 +48,7 @@
     .count-badge {
       display: inline-block;
       margin-top: 10px;
-      background: #4f46e5;
+      background: #6366F1;
       color: #fff;
       font-size: 0.7rem;
       font-weight: 700;
@@ -91,12 +91,12 @@
       outline: none;
       transition: border-color 0.15s;
     }
-    .filter-select:focus { border-color: #4f46e5; background-color: #fff; }
+    .filter-select:focus { border-color: #6366F1; background-color: #fff; }
 
     .reset-btn {
       width: 100%;
       padding: 9px;
-      background: #4f46e5;
+      background: #6366F1;
       color: #ffffff;
       border: none;
       border-radius: 9px;
@@ -107,7 +107,7 @@
       transition: background 0.15s;
       margin-top: 2px;
     }
-    .reset-btn:hover { background: #4338ca; }
+    .reset-btn:hover { background: #4F46E5; }
 
     .legend-section {
       margin-top: 20px;
@@ -236,11 +236,11 @@
       outline: none;
       transition: border-color 0.15s;
     }
-    .search-wrap input:focus { border-color: #4f46e5; background: #fff; }
+    .search-wrap input:focus { border-color: #6366F1; background: #fff; }
     .search-wrap input::placeholder { color: #94a3b8; }
     .search-btn {
       padding: 9px 14px;
-      background: #4f46e5;
+      background: #6366F1;
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -251,7 +251,7 @@
       white-space: nowrap;
       transition: background 0.15s;
     }
-    .search-btn:hover { background: #4338ca; }
+    .search-btn:hover { background: #4F46E5; }
 
     #filter-toggle { display: none; }
     #close-sidebar  { display: none; }
@@ -273,7 +273,7 @@
       }
 
       #mobile-filters summary {
-        background: #1a1a2e;
+        background: linear-gradient(135deg, #6366F1, #A855F7);
         color: #fff;
         padding: 14px 18px;
         font-size: 0.95rem;
@@ -306,7 +306,7 @@
     <div class="search-wrap">
       <input type="text" id="search-input-m" placeholder="" autocomplete="off" />
     </div>
-    <div id="search-result-m" style="font-size:0.75rem;color:#4f46e5;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
+    <div id="search-result-m" style="font-size:0.75rem;color:#6366F1;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
 
     <div class="filter-group">
       <label class="filter-label">Organization</label>
@@ -374,7 +374,7 @@
     <div class="search-wrap">
       <input type="text" id="search-input" placeholder="" autocomplete="off" />
     </div>
-    <div id="search-result" style="font-size:0.75rem;color:#4f46e5;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
+    <div id="search-result" style="font-size:0.75rem;color:#6366F1;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
 
     <div class="filter-group">
       <label class="filter-label" for="org-select">Organization</label>
@@ -439,14 +439,14 @@
 
 <script>
 const REGION_COLORS = {
-  "Middle East & North Africa": "#b45309",
-  "East Africa":                "#047857",
-  "Sub-Saharan Africa":         "#c2410c",
-  "Europe":                     "#1d4ed8",
-  "South & Central Asia":       "#6d28d9",
-  "Americas":                   "#b91c1c",
-  "Southeast Asia":             "#0e7490",
-  "North America":              "#3730a3",
+  "Middle East & North Africa": "#F59E0B",
+  "East Africa":                "#10B981",
+  "Sub-Saharan Africa":         "#F97316",
+  "Europe":                     "#3B82F6",
+  "South & Central Asia":       "#A855F7",
+  "Americas":                   "#EF4444",
+  "Southeast Asia":             "#06B6D4",
+  "North America":              "#6366F1",
 };
 
 const ORGS = {
