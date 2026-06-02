@@ -321,6 +321,7 @@
         <option value="global">Global Refuge</option>
         <option value="tent">Tent Partnership for Refugees</option>
         <option value="drc">Danish Refugee Council</option>
+        <option value="nrg">NGO Refugee Group</option>
       </select>
     </div>
     <div class="filter-group">
@@ -389,6 +390,7 @@
         <option value="global">Global Refuge</option>
         <option value="tent">Tent Partnership for Refugees</option>
         <option value="drc">Danish Refugee Council</option>
+        <option value="nrg">NGO Refugee Group</option>
       </select>
     </div>
 
@@ -459,6 +461,7 @@ const ORGS = {
   global: { name: "Global Refuge",                 donate: "https://secured.globalrefuge.org/page/52920/donate/1" },
   tent:   { name: "Tent Partnership for Refugees", donate: "https://www.tent.org/donate/" },
   drc:    { name: "Danish Refugee Council",        donate: "https://help.refugees.now/en" },
+  nrg:    { name: "NGO Refugee Group",             donate: "https://ngorefugeegroup.co.ke" },
 };
 
 const PROJECTS = [
@@ -521,6 +524,23 @@ const PROJECTS = [
   { org:"drc", name:"Ukraine Emergency Response", lat:48.00, lng:37.80, region:"Europe", support:["Emergency Relief","Shelter & Housing","Legal Aid & Protection"], desc:"DRC sends cash transfers to war-affected households in eastern Ukraine, deploys repair teams to patch shelled residential buildings, and runs mine risk education sessions in communities near the frontline.", donate:"https://help.refugees.now/en" },
   { org:"drc", name:"Jordan Refugee Livelihoods", lat:32.56, lng:37.98, region:"Middle East & North Africa", support:["Economic Empowerment","Legal Aid & Protection","Education"], desc:"DRC runs vocational training centres in Mafraq and Zarqa where Syrian and Sudanese refugees earn certified skills in carpentry, tailoring, and electrical work, while legal aid teams help them secure work permits.", donate:"https://help.refugees.now/en" },
   { org:"drc", name:"Ethiopia Refugee Response", lat:11.59, lng:37.39, region:"East Africa", support:["Emergency Relief","Legal Aid & Protection","Shelter & Housing"], desc:"DRC delivers food rations and emergency supplies to Eritrean and South Sudanese refugees stranded in Tigray and Amhara, and deploys protection staff who monitor and respond to safety incidents in the camps.", donate:"https://help.refugees.now/en" },
+
+  // NGO REFUGEE GROUP
+  { org:"nrg", name:"Kakuma & Kalobeyei Coordination Hub", lat:3.72, lng:34.87,
+    region:"East Africa",
+    support:["Advocacy & Policy","Legal Aid & Protection","Economic Empowerment"],
+    desc:"NGO Refugee Group coordinates 62 member organisations operating in Kakuma and Kalobeyei, aligning their programs, pooling resources, and presenting a unified voice to government and UN agencies so that refugees in Kenya's largest settlement receive consistent, non-duplicated support.",
+    donate:"https://ngorefugeegroup.co.ke" },
+  { org:"nrg", name:"Dadaab Refugee Response Network", lat:0.07, lng:40.32,
+    region:"East Africa",
+    support:["Advocacy & Policy","Emergency Relief","Legal Aid & Protection"],
+    desc:"NGO Refugee Group mobilises its member organisations in Dadaab to respond collectively to emerging humanitarian needs, generates technical evidence on protection gaps, and engages Kenyan government officials to improve conditions for the 200,000+ refugees hosted in the Dadaab complex.",
+    donate:"https://ngorefugeegroup.co.ke" },
+  { org:"nrg", name:"Nairobi Urban Refugee Policy Hub", lat:-1.29, lng:36.82,
+    region:"East Africa",
+    support:["Advocacy & Policy","Legal Aid & Protection","Economic Empowerment"],
+    desc:"NGO Refugee Group convenes monthly coordination meetings in Nairobi between its 62 member NGOs, donors, and UN agencies, producing joint policy briefs that advocate for urban refugees' right to work, access healthcare, and enrol children in Kenyan public schools.",
+    donate:"https://ngorefugeegroup.co.ke" },
 ];
 
 // MAP
