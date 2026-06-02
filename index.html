@@ -636,17 +636,40 @@ if (legendMEl) {
   });
 }
 
-// Search
+// Search — triggers on Enter, then zooms map to matching pins
 const searchInput = document.getElementById('search-input');
 const searchInputM = document.getElementById('search-input-m');
+
 function onSearch(val) {
-  filterSearch = val;
+  filterSearch = val.trim();
   if (searchInput.value !== val) searchInput.value = val;
   if (searchInputM.value !== val) searchInputM.value = val;
   applyFilters();
+
+  // Zoom map to matched markers
+  if (filterSearch) {
+    const matched = markers.filter(m => {
+      const p = m.projectData;
+      const q = filterSearch.toLowerCase();
+      return [p.name, p.region, p.desc, ORGS[p.org].name, ...p.support]
+        .some(s => s.toLowerCase().includes(q));
+    });
+    if (matched.length > 0) {
+      const group = L.featureGroup(matched);
+      map.fitBounds(group.getBounds().pad(0.3));
+    }
+  }
 }
-searchInput.addEventListener('input', e => onSearch(e.target.value));
-searchInputM.addEventListener('input', e => onSearch(e.target.value));
+
+function handleSearchKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    onSearch(e.target.value);
+  }
+}
+
+searchInput.addEventListener('keydown', handleSearchKey);
+searchInputM.addEventListener('keydown', handleSearchKey);
 
 // Mobile dropdowns sync
 document.getElementById('org-select-m').addEventListener('change', e => { filterOrg = e.target.value; document.getElementById('org-select').value = e.target.value; applyFilters(); });
