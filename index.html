@@ -296,10 +296,10 @@
 <details id="mobile-filters">
   <summary>Banking on Belonging</summary>
   <div id="mobile-filters-body">
-    <div class="search-wrap">
+    <form class="search-wrap" id="search-form-m" onsubmit="return false;">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search-input-m" placeholder="" />
-    </div>
+      <input type="search" id="search-input-m" placeholder="" autocomplete="off" />
+    </form>
 
     <div class="filter-group">
       <label class="filter-label">Organization</label>
@@ -364,10 +364,10 @@
 
   <div id="sidebar-body">
 
-    <div class="search-wrap">
+    <form class="search-wrap" id="search-form" onsubmit="return false;">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search-input" placeholder="" />
-    </div>
+      <input type="search" id="search-input" placeholder="" autocomplete="off" />
+    </form>
 
     <div class="filter-group">
       <label class="filter-label" for="org-select">Organization</label>
@@ -661,15 +661,10 @@ function onSearch(val) {
   }
 }
 
-function handleSearchKey(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    onSearch(e.target.value);
-  }
-}
-
-searchInput.addEventListener('keydown', handleSearchKey);
-searchInputM.addEventListener('keydown', handleSearchKey);
+document.getElementById('search-form').addEventListener('submit', e => { e.preventDefault(); onSearch(searchInput.value); });
+document.getElementById('search-form-m').addEventListener('submit', e => { e.preventDefault(); onSearch(searchInputM.value); });
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); onSearch(searchInput.value); } });
+searchInputM.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); onSearch(searchInputM.value); } });
 
 // Mobile dropdowns sync
 document.getElementById('org-select-m').addEventListener('change', e => { filterOrg = e.target.value; document.getElementById('org-select').value = e.target.value; applyFilters(); });
