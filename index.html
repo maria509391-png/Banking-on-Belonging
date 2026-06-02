@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banking on Belonging</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    /* SIDEBAR — fixed, never moves */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 300px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.10);
+      z-index: 2000;
+    }
+
+    #sidebar-header {
+      padding: 22px 20px 18px;
+      background: #1a1a2e;
+      flex-shrink: 0;
+    }
+
+    #sidebar-header h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    #sidebar-header p {
+      font-size: 0.74rem;
+      color: #94a3b8;
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+
+    .count-badge {
+      display: inline-block;
+      margin-top: 10px;
+      background: #4f46e5;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 11px;
+      border-radius: 20px;
+    }
+
+    #sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px;
+    }
+
+    #sidebar-body::-webkit-scrollbar { width: 4px; }
+    #sidebar-body::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+    .filter-group { margin-bottom: 16px; }
+
+    .filter-label {
+      display: block;
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .filter-select {
+      width: 100%;
+      padding: 8px 32px 8px 11px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      font-size: 0.81rem;
+      font-family: inherit;
+      color: #1e293b;
+      background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-select:focus { border-color: #4f46e5; background-color: #fff; }
+
+    .reset-btn {
+      width: 100%;
+      padding: 9px;
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.81rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: background 0.15s;
+      margin-top: 2px;
+    }
+    .reset-btn:hover { background: #4338ca; }
+
+    .legend-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1.5px solid #f1f5f9;
+    }
+
+    .legend-title {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      font-size: 0.75rem;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* MAP — sits to the right of the fixed sidebar */
+    #map {
+      position: fixed;
+      top: 0;
+      left: 300px;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+    }
+    /* POPUP */
+    .maplibregl-popup-content {
+      border-radius: 13px !important;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.12) !important;
+      padding: 0 !important;
+      overflow: hidden;
+      min-width: 265px;
+      max-width: 290px;
+    }
+    .maplibregl-popup-tip { display: none !important; }
+    .maplibregl-popup-close-button {
+      color: rgba(255,255,255,0.9) !important;
+      font-size: 20px !important;
+      top: 6px !important;
+      right: 10px !important;
+      background: none !important;
+      line-height: 1 !important;
+    }
+
+    .popup-header { padding: 13px 15px 11px; color: #fff; }
+    .popup-region-tag {
+      font-size: 0.63rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.88;
+      margin-bottom: 3px;
+    }
+    .popup-org { font-size: 0.71rem; opacity: 0.9; margin-bottom: 3px; }
+    .popup-title { font-size: 0.95rem; font-weight: 800; line-height: 1.2; }
+
+    .popup-body { padding: 11px 15px 13px; background: #fff; }
+    .popup-desc { font-size: 0.78rem; color: #475569; line-height: 1.55; margin-bottom: 10px; }
+
+    .popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 11px; }
+    .popup-tag {
+      font-size: 0.63rem;
+      font-weight: 600;
+      padding: 3px 7px;
+      border-radius: 20px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .donate-btn {
+      display: block;
+      text-align: center;
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.79rem;
+      text-decoration: none;
+      color: #ffffff !important;
+      letter-spacing: 0.2px;
+      border: 2px solid transparent;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    .donate-btn:visited { color: #ffffff !important; }
+    .donate-btn:hover {
+      background: #ffffff !important;
+      color: var(--rc) !important;
+      border-color: var(--rc) !important;
+    }
+
+    /* pin */
+    .map-pin-wrap { cursor: pointer; transition: transform 0.15s; }
+    .map-pin-wrap:hover { transform: scale(1.2) translateY(-3px); }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>Banking on Belonging</h1>
+    <p>Explore global projects supporting displaced communities</p>
+    <span class="count-badge" id="match-count">Loading…</span>
+  </div>
+
+  <div id="sidebar-body">
+
+    <div class="filter-group">
+      <label class="filter-label" for="org-select">Organization</label>
+      <select class="filter-select" id="org-select">
+        <option value="all">All Organizations</option>
+        <option value="unhcr">UNHCR</option>
+        <option value="mercy">Mercy Corps</option>
+        <option value="kiva">Kiva</option>
+        <option value="tech">Techfugees</option>
+        <option value="ri">Refugees International</option>
+        <option value="nrc">Norwegian Refugee Council</option>
+        <option value="global">Global Refuge</option>
+        <option value="tent">Tent Partnership for Refugees</option>
+        <option value="drc">Danish Refugee Council</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="region-select">Region</label>
+      <select class="filter-select" id="region-select">
+        <option value="all">All Regions</option>
+        <option>Middle East &amp; North Africa</option>
+        <option>East Africa</option>
+        <option>Sub-Saharan Africa</option>
+        <option>Europe</option>
+        <option>South &amp; Central Asia</option>
+        <option>Americas</option>
+        <option>Southeast Asia</option>
+        <option>North America</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label" for="support-select">Type of Support</label>
+      <select class="filter-select" id="support-select">
+        <option value="all">All Support Types</option>
+        <option>Emergency Relief</option>
+        <option>Food Security</option>
+        <option>Shelter &amp; Housing</option>
+        <option>Education</option>
+        <option>Economic Empowerment</option>
+        <option>Legal Aid &amp; Protection</option>
+        <option>Healthcare</option>
+        <option>Technology &amp; Digital Skills</option>
+        <option>Resettlement</option>
+        <option>Advocacy &amp; Policy</option>
+        <option>Microfinance</option>
+      </select>
+    </div>
+
+    <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+
+    <div class="legend-section">
+      <div class="legend-title">Color by Region</div>
+      <div id="legend"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+const REGION_COLORS = {
+  "Middle East & North Africa": "#b45309",
+  "East Africa":                "#047857",
+  "Sub-Saharan Africa":         "#c2410c",
+  "Europe":                     "#1d4ed8",
+  "South & Central Asia":       "#6d28d9",
+  "Americas":                   "#b91c1c",
+  "Southeast Asia":             "#0e7490",
+  "North America":              "#3730a3",
+};
+
+const ORGS = {
+  unhcr:  { name: "UNHCR",                         donate: "https://donate.unhcr.org/" },
+  mercy:  { name: "Mercy Corps",                   donate: "https://www.mercycorps.org/donate" },
+  kiva:   { name: "Kiva",                          donate: "https://www.kiva.org/lend/kiva-refugees" },
+  tech:   { name: "Techfugees",                    donate: "https://techfugees.com/donate/" },
+  ri:     { name: "Refugees International",        donate: "https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+  nrc:    { name: "Norwegian Refugee Council",     donate: "https://support.nrc.no/give-today/" },
+  global: { name: "Global Refuge",                 donate: "https://secured.globalrefuge.org/page/52920/donate/1" },
+  tent:   { name: "Tent Partnership for Refugees", donate: "https://www.tent.org/donate/" },
+  drc:    { name: "Danish Refugee Council",        donate: "https://help.refugees.now/en" },
+};
+
+const PROJECTS = [
+  { org:"unhcr", name:"Syria Emergency Response", lat:36.20, lng:37.20, region:"Middle East & North Africa", support:["Emergency Relief","Shelter & Housing","Legal Aid & Protection"], desc:"UNHCR delivers emergency shelter kits, legal protection, and monthly cash assistance to over 5 million displaced Syrians — both inside Syria and across Lebanon, Jordan, and Turkey.", donate:"https://donate.unhcr.org/" },
+  { org:"unhcr", name:"Rohingya Response – Cox's Bazar", lat:21.43, lng:92.00, region:"Southeast Asia", support:["Emergency Relief","Healthcare","Education"], desc:"UNHCR runs health clinics, builds schools, and coordinates protection services for over 900,000 Rohingya refugees living in Cox's Bazar — the world's largest refugee settlement.", donate:"https://donate.unhcr.org/" },
+  { org:"unhcr", name:"South Sudan Displacement Crisis", lat:4.85, lng:31.60, region:"East Africa", support:["Food Security","Shelter & Housing","Legal Aid & Protection"], desc:"UNHCR registers and protects 1.5 million internally displaced South Sudanese, distributing emergency food, building transitional shelters, and issuing civil documentation so families can access services.", donate:"https://donate.unhcr.org/" },
+  { org:"unhcr", name:"Venezuela Regional Response", lat:8.00, lng:-66.00, region:"Americas", support:["Legal Aid & Protection","Emergency Relief","Economic Empowerment"], desc:"UNHCR leads a regional coalition across 17 countries, processing asylum claims, issuing refugee ID cards, and connecting Venezuelan families to housing, schools, and job placement programs.", donate:"https://donate.unhcr.org/" },
+  { org:"unhcr", name:"Ukraine Emergency Operation", lat:50.45, lng:30.52, region:"Europe", support:["Emergency Relief","Shelter & Housing","Legal Aid & Protection"], desc:"UNHCR distributes emergency supply kits, sends cash transfers to 1.7 million displaced Ukrainians, and operates legal advice centres across Ukraine and 40+ European host countries.", donate:"https://donate.unhcr.org/" },
+  { org:"unhcr", name:"Ethiopia – Refugee Response", lat:9.03, lng:38.74, region:"East Africa", support:["Food Security","Healthcare","Education"], desc:"UNHCR manages 26 refugee camps across Ethiopia, runs vaccination drives, enrols refugee children in Ethiopian schools, and provides monthly cash stipends to nearly 870,000 refugees.", donate:"https://donate.unhcr.org/" },
+
+  { org:"mercy", name:"Syria Resilience & Livelihoods", lat:36.00, lng:36.80, region:"Middle East & North Africa", support:["Food Security","Economic Empowerment","Emergency Relief"], desc:"Mercy Corps delivers monthly cash transfers to Syrian families, trains farmers on drought-resistant crops, and links displaced workers to local markets so they can rebuild income from within their communities.", donate:"https://www.mercycorps.org/donate" },
+  { org:"mercy", name:"Yemen Emergency Food Aid", lat:15.55, lng:44.20, region:"Middle East & North Africa", support:["Food Security","Emergency Relief","Healthcare"], desc:"Mercy Corps distributes food vouchers to 400,000 Yemenis monthly, operates therapeutic feeding centres for malnourished children under five, and rehabilitates water networks in conflict-damaged neighbourhoods.", donate:"https://www.mercycorps.org/donate" },
+  { org:"mercy", name:"Somalia Water & Agriculture", lat:2.05, lng:45.34, region:"East Africa", support:["Food Security","Emergency Relief"], desc:"Mercy Corps repairs broken boreholes and irrigation canals across Somalia's displacement zones, and trains agro-pastoralist families on water conservation so they can sustain harvests through drought seasons.", donate:"https://www.mercycorps.org/donate" },
+  { org:"mercy", name:"Jordan – Syrian Refugee Livelihoods", lat:31.95, lng:35.93, region:"Middle East & North Africa", support:["Economic Empowerment","Education"], desc:"Mercy Corps matches Syrian refugees in Amman and Irbid with vocational training programs, awards small business grants up to $3,000, and teaches digital banking so they can save and transact safely.", donate:"https://www.mercycorps.org/donate" },
+  { org:"mercy", name:"Colombia – Venezuelan Migrant Support", lat:4.71, lng:-74.07, region:"Americas", support:["Emergency Relief","Economic Empowerment","Food Security"], desc:"Mercy Corps provides one-time cash grants to Venezuelan migrant families at the Colombian border, pairs them with psychosocial counsellors, and connects them to income opportunities in local host communities.", donate:"https://www.mercycorps.org/donate" },
+  { org:"mercy", name:"Nigeria – Northeast Crisis Response", lat:11.85, lng:13.16, region:"Sub-Saharan Africa", support:["Food Security","Emergency Relief","Healthcare"], desc:"Mercy Corps airlifts emergency food parcels to isolated displacement camps in Borno, installs solar-powered water pumps in Adamawa, and deploys protection monitors who document and respond to abuse against displaced civilians.", donate:"https://www.mercycorps.org/donate" },
+
+  { org:"kiva", name:"Kakuma Refugee Loans – Kenya", lat:3.72, lng:34.87, region:"East Africa", support:["Microfinance","Economic Empowerment"], desc:"Kiva crowdfunds 0% interest micro-loans from global lenders directly to refugee-run businesses in Kakuma — funding tailors, phone-repair kiosks, and food vendors who repay and reinvest in their communities.", donate:"https://www.kiva.org/lend/kiva-refugees" },
+  { org:"kiva", name:"Lebanese Syrian Refugee Microfinance", lat:33.89, lng:35.50, region:"Middle East & North Africa", support:["Microfinance","Economic Empowerment"], desc:"Kiva partners with Lebanese microfinance institutions to channel crowd-funded loans to Syrian refugee women who run home-based bakeries, sewing workshops, and grocery shops across Beirut and the Bekaa Valley.", donate:"https://www.kiva.org/lend/kiva-refugees" },
+  { org:"kiva", name:"Jordan Refugee Entrepreneur Loans", lat:31.25, lng:36.51, region:"Middle East & North Africa", support:["Microfinance","Economic Empowerment"], desc:"Kiva connects Syrian, Iraqi, and Sudanese refugees in Jordan to individual lenders worldwide, funding small enterprises that would otherwise be denied loans by traditional banks due to their refugee status.", donate:"https://www.kiva.org/lend/kiva-refugees" },
+  { org:"kiva", name:"Uganda Women Refugee Fund", lat:2.78, lng:31.49, region:"East Africa", support:["Microfinance","Economic Empowerment"], desc:"Kiva issues targeted loans to South Sudanese and Congolese refugee women in Arua and Adjumani districts, helping them launch vegetable gardens, charcoal stalls, and small livestock businesses.", donate:"https://www.kiva.org/lend/kiva-refugees" },
+  { org:"kiva", name:"Colombia Displaced Persons Loans", lat:7.89, lng:-72.50, region:"Americas", support:["Microfinance","Economic Empowerment"], desc:"Kiva disburses affordable micro-loans to Venezuelan migrants and displaced Colombians along the Cúcuta and Medellín corridors, enabling them to buy tools, stock inventory, and restart income-generating work.", donate:"https://www.kiva.org/lend/kiva-refugees" },
+
+  { org:"tech", name:"Digital Skills Athens", lat:37.98, lng:23.73, region:"Europe", support:["Technology & Digital Skills","Education","Economic Empowerment"], desc:"Techfugees runs free 12-week coding and UX design bootcamps for refugees in Athens, then introduces graduates directly to Greek tech startups and NGOs looking to hire multilingual digital talent.", donate:"https://techfugees.com/donate/" },
+  { org:"tech", name:"Tech Talent UK", lat:51.51, lng:-0.13, region:"Europe", support:["Technology & Digital Skills","Economic Empowerment"], desc:"Techfugees organises quarterly hackathons in London and Manchester where refugee developers team up with UK tech companies, and then brokers direct employment contracts for top performers.", donate:"https://techfugees.com/donate/" },
+  { org:"tech", name:"Digital Inclusion Kenya", lat:1.30, lng:36.82, region:"East Africa", support:["Technology & Digital Skills","Education"], desc:"Techfugees distributes smartphones and data SIMs to Somali and South Sudanese refugees in Nairobi, then trains them in freelance platforms like Upwork and Fiverr so they can earn remotely from day one.", donate:"https://techfugees.com/donate/" },
+  { org:"tech", name:"Jordan Coding Bootcamp", lat:31.96, lng:35.95, region:"Middle East & North Africa", support:["Technology & Digital Skills","Economic Empowerment","Education"], desc:"Techfugees delivers intensive eight-week coding bootcamps for Syrian refugees in Amman, covering web development and app design, and connects graduates to freelance contracts with regional tech clients.", donate:"https://techfugees.com/donate/" },
+  { org:"tech", name:"Berlin Tech Integration", lat:52.52, lng:13.40, region:"Europe", support:["Technology & Digital Skills","Economic Empowerment"], desc:"Techfugees combines German language classes with software development training for refugees in Berlin, and places graduates into paid internships at local startups — many of which convert to full-time roles.", donate:"https://techfugees.com/donate/" },
+
+  { org:"ri", name:"Ethiopia Advocacy Mission", lat:9.03, lng:38.24, region:"East Africa", support:["Advocacy & Policy","Legal Aid & Protection"], desc:"Refugees International sends field investigators to western Ethiopia who document protection gaps for Eritrean and South Sudanese refugees, then publish findings and directly brief US and UN officials to push for policy change.", donate:"https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+  { org:"ri", name:"Venezuela Crisis Advocacy", lat:10.48, lng:-66.90, region:"Americas", support:["Advocacy & Policy","Legal Aid & Protection"], desc:"Refugees International lobbies the US Congress and regional governments in Latin America to expand Temporary Protected Status and humanitarian visas for Venezuelans, and publishes reports exposing gaps in asylum systems.", donate:"https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+  { org:"ri", name:"Rohingya Advocacy – Myanmar", lat:16.87, lng:96.20, region:"Southeast Asia", support:["Advocacy & Policy","Legal Aid & Protection"], desc:"Refugees International deploys monitors to Myanmar and Bangladesh who document abuses against Rohingya communities, and then use that evidence to pressure governments and the UN to enforce accountability.", donate:"https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+  { org:"ri", name:"Sudan Crisis Response Advocacy", lat:15.55, lng:32.53, region:"Middle East & North Africa", support:["Advocacy & Policy","Emergency Relief"], desc:"Refugees International publishes urgent field reports on Sudan's displacement crisis and directly briefs G7 foreign ministers, demanding increased funding for humanitarian corridors and an end to aid blockages.", donate:"https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+  { org:"ri", name:"Gaza Protection Advocacy", lat:31.50, lng:34.47, region:"Middle East & North Africa", support:["Advocacy & Policy","Emergency Relief","Legal Aid & Protection"], desc:"Refugees International briefs the UN Security Council and US State Department on conditions in Gaza, demanding unimpeded humanitarian corridors and enforcement of international law to protect civilians forced from their homes.", donate:"https://give.refugeesinternational.org/a/defend-rights-and-refuge-worldwide-2" },
+
+  { org:"nrc", name:"Gaza Emergency Shelter", lat:31.35, lng:34.31, region:"Middle East & North Africa", support:["Shelter & Housing","Emergency Relief","Legal Aid & Protection"], desc:"NRC delivers emergency shelter kits and mattresses to families in Gaza whose homes have been destroyed, and deploys legal aid officers who help displaced Palestinians obtain documentation to access food and medical aid.", donate:"https://support.nrc.no/give-today/" },
+  { org:"nrc", name:"Syria Education & Housing Rights", lat:33.51, lng:36.29, region:"Middle East & North Africa", support:["Education","Shelter & Housing","Legal Aid & Protection"], desc:"NRC operates 200+ schools and informal learning centres for displaced Syrian children, and runs housing rights clinics that help families reclaim or legalise their homes after years of conflict-driven displacement.", donate:"https://support.nrc.no/give-today/" },
+  { org:"nrc", name:"South Sudan Education in Emergencies", lat:6.87, lng:31.59, region:"East Africa", support:["Education","Emergency Relief","Legal Aid & Protection"], desc:"NRC builds and staffs temporary learning centres in South Sudan's displacement camps, trains local teachers in trauma-informed pedagogy, and ensures children have a safe daily routine even amid active conflict.", donate:"https://support.nrc.no/give-today/" },
+  { org:"nrc", name:"Afghanistan Shelter & Legal Aid", lat:34.52, lng:69.18, region:"South & Central Asia", support:["Shelter & Housing","Legal Aid & Protection","Emergency Relief"], desc:"NRC installs winterised shelters for Afghan families returning from Pakistan and Iran, issues identity documents to people who lost papers during conflict, and provides free legal advice on land and property disputes.", donate:"https://support.nrc.no/give-today/" },
+  { org:"nrc", name:"Ukraine Emergency Response", lat:49.84, lng:24.03, region:"Europe", support:["Emergency Relief","Shelter & Housing","Legal Aid & Protection"], desc:"NRC transfers emergency cash to displaced Ukrainian families, sends repair crews to patch bomb-damaged homes in liberated areas, and runs legal help desks so families can claim housing rights and benefits.", donate:"https://support.nrc.no/give-today/" },
+  { org:"nrc", name:"DRC – Education & Protection", lat:-4.32, lng:15.32, region:"Sub-Saharan Africa", support:["Education","Legal Aid & Protection","Emergency Relief"], desc:"NRC constructs safe learning spaces in eastern DRC's most volatile displacement zones, deploys child protection monitors who identify and report abuse, and connects at-risk youth to psychosocial counselling.", donate:"https://support.nrc.no/give-today/" },
+
+  { org:"global", name:"Refugee Resettlement – Baltimore", lat:39.29, lng:-76.61, region:"North America", support:["Resettlement","Economic Empowerment","Education"], desc:"Global Refuge secures apartments, furnishes them before families arrive, enrols children in local schools, and pairs each refugee family with a case manager who guides them through their first 90 days in Baltimore.", donate:"https://secured.globalrefuge.org/page/52920/donate/1" },
+  { org:"global", name:"New York Refugee Integration", lat:40.71, lng:-74.01, region:"North America", support:["Resettlement","Economic Empowerment"], desc:"Global Refuge places employment coaches with newly resettled refugees across New York, helping them write résumés, prepare for interviews, and enrol in benefits — with 80% placed in jobs within six months.", donate:"https://secured.globalrefuge.org/page/52920/donate/1" },
+  { org:"global", name:"Houston Workforce Development", lat:29.76, lng:-95.37, region:"North America", support:["Resettlement","Economic Empowerment"], desc:"Global Refuge brokers partnerships with over 150 Houston employers, runs sector-specific job training for refugees from 20+ countries, and tracks long-term employment outcomes to ensure placements stick.", donate:"https://secured.globalrefuge.org/page/52920/donate/1" },
+  { org:"global", name:"Miami Asylum Seekers Services", lat:25.77, lng:-80.19, region:"North America", support:["Legal Aid & Protection","Resettlement"], desc:"Global Refuge stations legal screeners at Miami's ports of entry who assess each asylum seeker's claim on arrival, assigns case managers to navigate the immigration process, and places families with community sponsors.", donate:"https://secured.globalrefuge.org/page/52920/donate/1" },
+  { org:"global", name:"Chicago Refugee Welcoming Network", lat:41.88, lng:-87.63, region:"North America", support:["Resettlement","Education","Economic Empowerment"], desc:"Global Refuge recruits and trains Chicago neighbours to form welcoming circles that greet new refugee families, tutor English weekly, and stay connected for a full year to ease the transition into community life.", donate:"https://secured.globalrefuge.org/page/52920/donate/1" },
+
+  { org:"tent", name:"Germany Corporate Refugee Hiring", lat:52.52, lng:13.00, region:"Europe", support:["Economic Empowerment"], desc:"Tent Partnership rallies 200+ German companies — including Siemens and Deutsche Telekom — to commit to refugee hiring quotas, offer mentorship programs, and adapt HR processes to remove barriers for refugee applicants.", donate:"https://www.tent.org/donate/" },
+  { org:"tent", name:"USA Refugee Employment Initiative", lat:40.71, lng:-73.61, region:"North America", support:["Economic Empowerment","Resettlement"], desc:"Tent Partnership signs MOUs with Fortune 500 companies across the US, requiring them to set annual refugee hiring targets, assign corporate mentors, and report publicly on progress — creating lasting accountability.", donate:"https://www.tent.org/donate/" },
+  { org:"tent", name:"Turkey Syrian Refugee Employment", lat:39.92, lng:32.85, region:"Middle East & North Africa", support:["Economic Empowerment"], desc:"Tent Partnership works with Turkish manufacturers and retailers to formalise employment for Syrian refugees — replacing informal, unprotected labour arrangements with contracts, benefits, and structured career development.", donate:"https://www.tent.org/donate/" },
+  { org:"tent", name:"Brazil Venezuelan Refugee Jobs", lat:-15.78, lng:-47.93, region:"Americas", support:["Economic Empowerment","Resettlement"], desc:"Tent Partnership signs pledges with major Brazilian employers to hire Venezuelan refugees, funds Portuguese language courses, and advocates for faster recognition of Venezuelan professional qualifications.", donate:"https://www.tent.org/donate/" },
+  { org:"tent", name:"UK Refugee Business Integration", lat:51.51, lng:-0.50, region:"Europe", support:["Economic Empowerment"], desc:"Tent Partnership mobilises UK corporations to sign refugee employment pledges, runs cross-sector skills training days, and pairs refugee job-seekers with senior corporate mentors for one-on-one career coaching.", donate:"https://www.tent.org/donate/" },
+
+  { org:"drc", name:"Syria Protection & Shelter", lat:36.20, lng:38.00, region:"Middle East & North Africa", support:["Shelter & Housing","Legal Aid & Protection","Emergency Relief"], desc:"DRC repairs and winterises shelters for 80,000 conflict-affected Syrians in northeast Syria, stations protection monitors who record and report rights violations, and issues civil documents so families can move and access services.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Iraq Durable Solutions", lat:33.34, lng:44.40, region:"Middle East & North Africa", support:["Shelter & Housing","Economic Empowerment","Legal Aid & Protection"], desc:"DRC works with displaced Iraqi families in Mosul and Sinjar to assess whether return, local integration, or relocation is safest, then funds housing repairs, vocational training, and legal documentation for whichever path they choose.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"South Sudan Emergency", lat:9.53, lng:31.66, region:"East Africa", support:["Emergency Relief","Food Security","Shelter & Housing"], desc:"DRC airdrops emergency food parcels and household item kits to cut-off displacement communities in Upper Nile and Unity states, and rapidly erects transitional shelters before seasonal flooding makes areas unreachable.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Somalia Resilience Programme", lat:3.00, lng:44.90, region:"East Africa", support:["Food Security","Economic Empowerment","Shelter & Housing"], desc:"DRC trains Somali IDPs and returnees in Mogadishu on small business management, provides startup grants, and connects them to city employment networks so they can integrate into urban livelihoods rather than remain dependent on aid.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Nigeria Displacement Crisis", lat:11.85, lng:13.30, region:"Sub-Saharan Africa", support:["Emergency Relief","Legal Aid & Protection","Shelter & Housing"], desc:"DRC distributes emergency household kits and builds transitional shelters for families displaced by Boko Haram in Borno state, while protection officers identify and refer survivors of violence to specialised support services.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Ukraine Emergency Response", lat:48.00, lng:37.80, region:"Europe", support:["Emergency Relief","Shelter & Housing","Legal Aid & Protection"], desc:"DRC sends cash transfers to war-affected households in eastern Ukraine, deploys repair teams to patch shelled residential buildings, and runs mine risk education sessions in communities near the frontline.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Jordan Refugee Livelihoods", lat:32.56, lng:37.98, region:"Middle East & North Africa", support:["Economic Empowerment","Legal Aid & Protection","Education"], desc:"DRC runs vocational training centres in Mafraq and Zarqa where Syrian and Sudanese refugees earn certified skills in carpentry, tailoring, and electrical work, while legal aid teams help them secure work permits.", donate:"https://help.refugees.now/en" },
+  { org:"drc", name:"Ethiopia Refugee Response", lat:11.59, lng:37.39, region:"East Africa", support:["Emergency Relief","Legal Aid & Protection","Shelter & Housing"], desc:"DRC delivers food rations and emergency supplies to Eritrean and South Sudanese refugees stranded in Tigray and Amhara, and deploys protection staff who monitor and respond to safety incidents in the camps.", donate:"https://help.refugees.now/en" },
+];
+
+// MAP
+const map = L.map('map', {
+  center: [20, 20],
+  zoom: 3,
+  minZoom: 2,
+  maxZoom: 18,
+  worldCopyJump: false,
+  maxBounds: [[-90, -180], [90, 180]],
+  maxBoundsViscosity: 1.0,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
+  minZoom: 2,
+  maxZoom: 18,
+  noWrap: true,
+}).addTo(map);
+
+// PIN
+function createPin(color) {
+  return L.divIcon({
+    className: '',
+    html: `<svg class="map-pin-wrap" xmlns="http://www.w3.org/2000/svg" width="26" height="38" viewBox="0 0 26 38">
+      <path d="M13 1C6.9 1 2 5.9 2 12c0 10 11 25 11 25S24 22 24 12C24 5.9 19.1 1 13 1z"
+        fill="${color}" stroke="white" stroke-width="1.8"/>
+      <circle cx="13" cy="12" r="5" fill="white" fill-opacity="0.9"/>
+    </svg>`,
+    iconSize: [26, 38],
+    iconAnchor: [13, 38],
+    popupAnchor: [0, -40],
+  });
+}
+
+// POPUP
+function buildPopup(p) {
+  const color = REGION_COLORS[p.region] || '#64748b';
+  const orgName = ORGS[p.org].name;
+  const tags = p.support.map(s => `<span class="popup-tag">${s}</span>`).join('');
+  const donateUrl = p.donate || ORGS[p.org].donate;
+  return `
+    <div class="popup-header" style="background:${color}">
+      <div class="popup-region-tag">${p.region}</div>
+      <div class="popup-org">${orgName}</div>
+      <div class="popup-title">${p.name}</div>
+    </div>
+    <div class="popup-body">
+      <div class="popup-desc">${p.desc}</div>
+      <div class="popup-tags">${tags}</div>
+      <a class="donate-btn" href="${donateUrl}" target="_blank" rel="noopener"
+         style="background:${color};--rc:${color}">
+        Donate via ${orgName} &rarr;
+      </a>
+    </div>`;
+}
+
+// MARKERS
+const markers = PROJECTS.map(p => {
+  const color = REGION_COLORS[p.region] || '#64748b';
+  const m = L.marker([p.lat, p.lng], { icon: createPin(color) });
+  m.bindPopup(buildPopup(p), { maxWidth: 300 });
+  m.projectData = p;
+  m.addTo(map);
+  return m;
+});
+
+// FILTERS
+let filterOrg = 'all', filterRegion = 'all', filterSupport = 'all';
+
+function applyFilters() {
+  let count = 0;
+  markers.forEach(m => {
+    const p = m.projectData;
+    const ok = (filterOrg === 'all' || p.org === filterOrg)
+            && (filterRegion === 'all' || p.region === filterRegion)
+            && (filterSupport === 'all' || p.support.includes(filterSupport));
+    ok ? m.addTo(map) : m.remove();
+    if (ok) count++;
+  });
+  document.getElementById('match-count').textContent =
+    `${count} project${count !== 1 ? 's' : ''} shown`;
+}
+
+document.getElementById('org-select').addEventListener('change', e => { filterOrg = e.target.value; applyFilters(); });
+document.getElementById('region-select').addEventListener('change', e => { filterRegion = e.target.value; applyFilters(); });
+document.getElementById('support-select').addEventListener('change', e => { filterSupport = e.target.value; applyFilters(); });
+
+function resetFilters() {
+  filterOrg = filterRegion = filterSupport = 'all';
+  ['org-select','region-select','support-select'].forEach(id => document.getElementById(id).value = 'all');
+  applyFilters();
+}
+
+// LEGEND
+const legendEl = document.getElementById('legend');
+Object.entries(REGION_COLORS).forEach(([region, color]) => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${color}"></div>${region}`;
+  legendEl.appendChild(item);
+});
+
+applyFilters();
+</script>
+</body>
+</html>
