@@ -607,8 +607,8 @@ function applyFilters() {
     ok ? m.addTo(map) : m.remove();
     if (ok) count++;
   });
-  document.getElementById('match-count').textContent =
-    `${count} project${count !== 1 ? 's' : ''} shown`;
+  const mc = document.getElementById('match-count');
+  if (mc) mc.textContent = `${count} project${count !== 1 ? 's' : ''} shown`;
 }
 
 document.getElementById('org-select').addEventListener('change', e => { filterOrg = e.target.value; applyFilters(); });
