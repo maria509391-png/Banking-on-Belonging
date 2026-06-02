@@ -225,7 +225,7 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 3000;
+      z-index: 9999;
       background: #1a1a2e;
       color: #fff;
       border: none;
@@ -236,9 +236,10 @@
       font-family: inherit;
       cursor: pointer;
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      display: none;
       align-items: center;
       gap: 8px;
+      pointer-events: all;
+      touch-action: manipulation;
     }
 
     /* ── OVERLAY ─────────────────────────────────────── */
@@ -569,9 +570,11 @@ const closeBtn = document.getElementById('close-sidebar');
 function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('open'); }
 function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 
-toggleBtn.addEventListener('click', openSidebar);
-closeBtn.addEventListener('click', closeSidebar);
-overlay.addEventListener('click', closeSidebar);
+['click','touchend'].forEach(evt => {
+  toggleBtn.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); openSidebar(); });
+  closeBtn.addEventListener(evt,  e => { e.preventDefault(); e.stopPropagation(); closeSidebar(); });
+  overlay.addEventListener(evt,   e => { e.preventDefault(); closeSidebar(); });
+});
 </script>
 </body>
 </html>
