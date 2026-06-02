@@ -307,6 +307,7 @@
       <input type="text" id="search-input-m" placeholder="" autocomplete="off" />
       <button class="search-btn" onclick="onSearch(document.getElementById('search-input-m').value)">Search</button>
     </div>
+    <div id="search-result-m" style="font-size:0.75rem;color:#4f46e5;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
 
     <div class="filter-group">
       <label class="filter-label">Organization</label>
@@ -375,6 +376,7 @@
       <input type="text" id="search-input" placeholder="" autocomplete="off" />
       <button class="search-btn" onclick="onSearch(document.getElementById('search-input').value)">Search</button>
     </div>
+    <div id="search-result" style="font-size:0.75rem;color:#4f46e5;font-weight:600;margin-bottom:10px;min-height:16px;"></div>
 
     <div class="filter-group">
       <label class="filter-label" for="org-select">Organization</label>
@@ -653,7 +655,9 @@ function onSearch(val) {
   if (searchInputM.value !== val) searchInputM.value = val;
   applyFilters();
 
-  // Zoom map to matched markers
+  const resultEl = document.getElementById('search-result');
+  const resultElM = document.getElementById('search-result-m');
+
   if (filterSearch) {
     const matched = markers.filter(m => {
       const p = m.projectData;
@@ -661,10 +665,24 @@ function onSearch(val) {
       return [p.name, p.region, p.desc, ORGS[p.org].name, ...p.support]
         .some(s => s.toLowerCase().includes(q));
     });
+
+    const msg = matched.length
+      ? `${matched.length} project${matched.length !== 1 ? 's' : ''} found`
+      : 'No projects found';
+    if (resultEl)  resultEl.textContent  = msg;
+    if (resultElM) resultElM.textContent = msg;
+
     if (matched.length > 0) {
       const group = L.featureGroup(matched);
       map.fitBounds(group.getBounds().pad(0.3));
     }
+
+    // Close mobile panel so user can see the map
+    const mf = document.getElementById('mobile-filters');
+    if (mf) mf.removeAttribute('open');
+  } else {
+    if (resultEl)  resultEl.textContent  = '';
+    if (resultElM) resultElM.textContent = '';
   }
 }
 
