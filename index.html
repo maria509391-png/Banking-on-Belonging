@@ -218,6 +218,34 @@
     .map-pin-wrap { cursor: pointer; transition: transform 0.15s; }
     .map-pin-wrap:hover { transform: scale(1.2) translateY(-3px); }
 
+    /* SEARCH */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      color: #1e293b;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input:focus { border-color: #4f46e5; background: #fff; }
+    .search-wrap input::placeholder { color: #94a3b8; }
+    .search-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: #94a3b8;
+    }
+
     #filter-toggle { display: none; }
     #close-sidebar  { display: none; }
     #overlay        { display: none; }
@@ -268,6 +296,11 @@
 <details id="mobile-filters">
   <summary>Banking on Belonging</summary>
   <div id="mobile-filters-body">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input-m" placeholder="Search country, region, community…" />
+    </div>
+
     <div class="filter-group">
       <label class="filter-label">Organization</label>
       <select class="filter-select" id="org-select-m">
@@ -330,6 +363,11 @@
   </div>
 
   <div id="sidebar-body">
+
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search country, region, community…" />
+    </div>
 
     <div class="filter-group">
       <label class="filter-label" for="org-select">Organization</label>
@@ -544,13 +582,17 @@ const markers = PROJECTS.map(p => {
 });
 
 // FILTERS
-let filterOrg = 'all', filterRegion = 'all', filterSupport = 'all';
+let filterOrg = 'all', filterRegion = 'all', filterSupport = 'all', filterSearch = '';
 
 function applyFilters() {
   let count = 0;
   markers.forEach(m => {
     const p = m.projectData;
-    const ok = (filterOrg === 'all' || p.org === filterOrg)
+    const q = filterSearch.toLowerCase();
+    const searchOk = !q || [p.name, p.region, p.desc, ORGS[p.org].name, ...p.support]
+      .some(s => s.toLowerCase().includes(q));
+    const ok = searchOk
+            && (filterOrg === 'all' || p.org === filterOrg)
             && (filterRegion === 'all' || p.region === filterRegion)
             && (filterSupport === 'all' || p.support.includes(filterSupport));
     ok ? m.addTo(map) : m.remove();
@@ -566,7 +608,9 @@ document.getElementById('support-select').addEventListener('change', e => { filt
 
 function resetFilters() {
   filterOrg = filterRegion = filterSupport = 'all';
+  filterSearch = '';
   ['org-select','region-select','support-select'].forEach(id => document.getElementById(id).value = 'all');
+  ['search-input','search-input-m'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
 
@@ -591,6 +635,18 @@ if (legendMEl) {
     legendMEl.appendChild(item);
   });
 }
+
+// Search
+const searchInput = document.getElementById('search-input');
+const searchInputM = document.getElementById('search-input-m');
+function onSearch(val) {
+  filterSearch = val;
+  if (searchInput.value !== val) searchInput.value = val;
+  if (searchInputM.value !== val) searchInputM.value = val;
+  applyFilters();
+}
+searchInput.addEventListener('input', e => onSearch(e.target.value));
+searchInputM.addEventListener('input', e => onSearch(e.target.value));
 
 // Mobile dropdowns sync
 document.getElementById('org-select-m').addEventListener('change', e => { filterOrg = e.target.value; document.getElementById('org-select').value = e.target.value; applyFilters(); });
