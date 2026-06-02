@@ -218,125 +218,109 @@
     .map-pin-wrap { cursor: pointer; transition: transform 0.15s; }
     .map-pin-wrap:hover { transform: scale(1.2) translateY(-3px); }
 
-    /* ── MOBILE NAVBAR ───────────────────────────────── */
-    #mobile-nav {
-      display: none;
-    }
-
-    #mobile-dropdown {
-      display: none;
-      position: fixed;
-      top: 52px;
-      left: 0;
-      right: 0;
-      background: #fff;
-      z-index: 9999;
-      padding: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-      overflow-y: auto;
-      max-height: calc(100vh - 52px);
-    }
-    #mobile-dropdown.open { display: block; }
-
     #filter-toggle { display: none; }
     #close-sidebar  { display: none; }
     #overlay        { display: none; }
 
-    @media (max-width: 768px) {
-      #sidebar { display: none; }
-      #map { left: 0 !important; top: 52px !important; }
+    /* ── MOBILE ──────────────────────────────────────── */
+    #mobile-filters { display: none; }
 
-      #mobile-nav {
+    @media (max-width: 768px) {
+      #sidebar { display: none !important; }
+      #map { left: 0 !important; top: 0 !important; bottom: 0 !important; }
+
+      #mobile-filters {
+        display: block;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 9999;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+      }
+
+      #mobile-filters summary {
+        background: #1a1a2e;
+        color: #fff;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        list-style: none;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        height: 52px;
-        background: #1a1a2e;
-        padding: 0 16px;
-        z-index: 9999;
-      }
-
-      #mobile-nav span {
-        color: #fff;
-        font-weight: 800;
-        font-size: 0.95rem;
-        letter-spacing: -0.2px;
-      }
-
-      #mobile-menu-btn {
-        background: none;
-        border: none;
-        color: #fff;
-        font-size: 1.5rem;
         cursor: pointer;
-        padding: 4px 8px;
-        line-height: 1;
+      }
+      #mobile-filters summary::-webkit-details-marker { display: none; }
+      #mobile-filters summary::after { content: '☰'; font-size: 1.1rem; }
+      #mobile-filters[open] summary::after { content: '✕'; }
+
+      #mobile-filters-body {
+        background: #fff;
+        padding: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        overflow-y: auto;
+        max-height: 70vh;
       }
     }
   </style>
 </head>
 <body>
 
-<nav id="mobile-nav">
-  <span>Banking on Belonging</span>
-  <button id="mobile-menu-btn">&#9776;</button>
-</nav>
-
-<div id="mobile-dropdown">
-  <div class="filter-group">
-    <label class="filter-label">Organization</label>
-    <select class="filter-select" id="org-select-m">
-      <option value="all">All Organizations</option>
-      <option value="unhcr">UNHCR</option>
-      <option value="mercy">Mercy Corps</option>
-      <option value="kiva">Kiva</option>
-      <option value="tech">Techfugees</option>
-      <option value="ri">Refugees International</option>
-      <option value="nrc">Norwegian Refugee Council</option>
-      <option value="global">Global Refuge</option>
-      <option value="tent">Tent Partnership for Refugees</option>
-      <option value="drc">Danish Refugee Council</option>
-    </select>
+<details id="mobile-filters">
+  <summary>Banking on Belonging</summary>
+  <div id="mobile-filters-body">
+    <div class="filter-group">
+      <label class="filter-label">Organization</label>
+      <select class="filter-select" id="org-select-m">
+        <option value="all">All Organizations</option>
+        <option value="unhcr">UNHCR</option>
+        <option value="mercy">Mercy Corps</option>
+        <option value="kiva">Kiva</option>
+        <option value="tech">Techfugees</option>
+        <option value="ri">Refugees International</option>
+        <option value="nrc">Norwegian Refugee Council</option>
+        <option value="global">Global Refuge</option>
+        <option value="tent">Tent Partnership for Refugees</option>
+        <option value="drc">Danish Refugee Council</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Region</label>
+      <select class="filter-select" id="region-select-m">
+        <option value="all">All Regions</option>
+        <option>Middle East &amp; North Africa</option>
+        <option>East Africa</option>
+        <option>Sub-Saharan Africa</option>
+        <option>Europe</option>
+        <option>South &amp; Central Asia</option>
+        <option>Americas</option>
+        <option>Southeast Asia</option>
+        <option>North America</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Type of Support</label>
+      <select class="filter-select" id="support-select-m">
+        <option value="all">All Support Types</option>
+        <option>Emergency Relief</option>
+        <option>Food Security</option>
+        <option>Shelter &amp; Housing</option>
+        <option>Education</option>
+        <option>Economic Empowerment</option>
+        <option>Legal Aid &amp; Protection</option>
+        <option>Healthcare</option>
+        <option>Technology &amp; Digital Skills</option>
+        <option>Resettlement</option>
+        <option>Advocacy &amp; Policy</option>
+        <option>Microfinance</option>
+      </select>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+    <div class="legend-section">
+      <div class="legend-title">Color by Region</div>
+      <div id="legend-m"></div>
+    </div>
   </div>
-  <div class="filter-group">
-    <label class="filter-label">Region</label>
-    <select class="filter-select" id="region-select-m">
-      <option value="all">All Regions</option>
-      <option>Middle East &amp; North Africa</option>
-      <option>East Africa</option>
-      <option>Sub-Saharan Africa</option>
-      <option>Europe</option>
-      <option>South &amp; Central Asia</option>
-      <option>Americas</option>
-      <option>Southeast Asia</option>
-      <option>North America</option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label class="filter-label">Type of Support</label>
-    <select class="filter-select" id="support-select-m">
-      <option value="all">All Support Types</option>
-      <option>Emergency Relief</option>
-      <option>Food Security</option>
-      <option>Shelter &amp; Housing</option>
-      <option>Education</option>
-      <option>Economic Empowerment</option>
-      <option>Legal Aid &amp; Protection</option>
-      <option>Healthcare</option>
-      <option>Technology &amp; Digital Skills</option>
-      <option>Resettlement</option>
-      <option>Advocacy &amp; Policy</option>
-      <option>Microfinance</option>
-    </select>
-  </div>
-  <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
-  <div class="legend-section">
-    <div class="legend-title">Color by Region</div>
-    <div id="legend-m"></div>
-  </div>
-</div>
+</details>
 
 <div id="sidebar">
   <div id="sidebar-header">
@@ -597,11 +581,6 @@ Object.entries(REGION_COLORS).forEach(([region, color]) => {
 
 applyFilters();
 
-// Mobile nav menu
-const dropdown = document.getElementById('mobile-dropdown');
-const menuBtn  = document.getElementById('mobile-menu-btn');
-menuBtn.onclick = () => dropdown.classList.toggle('open');
-
 // Mobile legend
 const legendMEl = document.getElementById('legend-m');
 if (legendMEl) {
@@ -613,22 +592,10 @@ if (legendMEl) {
   });
 }
 
-// Sync mobile dropdowns with desktop filters
-document.getElementById('org-select-m').addEventListener('change', e => {
-  filterOrg = e.target.value;
-  document.getElementById('org-select').value = e.target.value;
-  applyFilters();
-});
-document.getElementById('region-select-m').addEventListener('change', e => {
-  filterRegion = e.target.value;
-  document.getElementById('region-select').value = e.target.value;
-  applyFilters();
-});
-document.getElementById('support-select-m').addEventListener('change', e => {
-  filterSupport = e.target.value;
-  document.getElementById('support-select').value = e.target.value;
-  applyFilters();
-});
+// Mobile dropdowns sync
+document.getElementById('org-select-m').addEventListener('change', e => { filterOrg = e.target.value; document.getElementById('org-select').value = e.target.value; applyFilters(); });
+document.getElementById('region-select-m').addEventListener('change', e => { filterRegion = e.target.value; document.getElementById('region-select').value = e.target.value; applyFilters(); });
+document.getElementById('support-select-m').addEventListener('change', e => { filterSupport = e.target.value; document.getElementById('support-select').value = e.target.value; applyFilters(); });
 </script>
 </body>
 </html>
