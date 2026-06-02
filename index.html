@@ -527,7 +527,7 @@ const PROJECTS = [
 const map = L.map('map', {
   center: [20, 20],
   zoom: 3,
-  minZoom: 2,
+  minZoom: 1,
   maxZoom: 18,
   worldCopyJump: false,
   maxBounds: [[-90, -180], [90, 180]],
@@ -631,6 +631,17 @@ Object.entries(REGION_COLORS).forEach(([region, color]) => {
 });
 
 applyFilters();
+
+// Lock minimum zoom so map always fills the screen with no grey edges
+map.whenReady(function () {
+  function setFitZoom() {
+    const z = map.getBoundsZoom(L.latLngBounds([[-75, -180], [75, 180]]), false);
+    map.setMinZoom(z);
+    if (map.getZoom() < z) map.setZoom(z);
+  }
+  setFitZoom();
+  map.on('resize', setFitZoom);
+});
 
 // Mobile legend
 const legendMEl = document.getElementById('legend-m');
