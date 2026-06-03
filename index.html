@@ -206,14 +206,22 @@
       #stats-bar {
         left: 0;
         height: auto;
-        padding: 10px 8px;
-        flex-wrap: wrap;
-        gap: 6px;
+        padding: 10px 12px;
+        flex-wrap: nowrap;
+        gap: 0;
+        justify-content: space-around;
+        overflow-x: auto;
       }
-      #map { top: 52px; bottom: 72px; }
-      .stat-item { border-right: none; min-width: 30%; }
-      .stat-number { font-size: 0.9rem; }
-      .stat-label { font-size: 0.5rem; }
+      #map { top: 52px; bottom: 64px; }
+      .stat-item {
+        border-right: 1px solid rgba(255,255,255,0.15);
+        min-width: auto;
+        flex: 1;
+        padding: 4px 6px;
+      }
+      .stat-item:last-child { border-right: none; }
+      .stat-number { font-size: 0.8rem; }
+      .stat-label { font-size: 0.48rem; letter-spacing: 0.6px; }
     }
     /* POPUP */
     .maplibregl-popup-content {
