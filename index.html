@@ -444,6 +444,15 @@
       <div class="legend-title">Color by Region</div>
       <div id="legend-m"></div>
     </div>
+    <div class="legend-section">
+      <div class="legend-title">UNHCR Live Data</div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
+        <span>Show Refugee Settlements</span>
+      </label>
+      <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
+      <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
+    </div>
   </div>
 </details>
 
@@ -914,16 +923,20 @@ async function loadUnhcrLayer() {
 
   unhcrCluster.addTo(map);
   unhcrLoaded = true;
-  statusEl.textContent = `${total.toLocaleString()} settlements loaded`;
 
-  // Build legend
-  const legendEl = document.getElementById('unhcr-legend');
-  legendEl.style.display = 'block';
-  legendEl.innerHTML = Object.values(UNHCR_POP_TYPES).map(pt =>
+  const legendHTML = Object.values(UNHCR_POP_TYPES).map(pt =>
     `<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:0.72rem;color:#334155;font-weight:500">
       <div style="width:10px;height:10px;border-radius:50%;background:${pt.color};flex-shrink:0"></div>${pt.label}
     </div>`
   ).join('');
+  const msg = `${total.toLocaleString()} settlements loaded`;
+
+  ['unhcr-status','unhcr-status-m'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = msg;
+  });
+  ['unhcr-legend','unhcr-legend-m'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.style.display = 'block'; el.innerHTML = legendHTML; }
+  });
 }
 
 function toggleUnhcrLayer(on) {
@@ -936,8 +949,14 @@ function toggleUnhcrLayer(on) {
     }
   } else {
     if (unhcrCluster) { unhcrCluster.remove(); }
-    document.getElementById('unhcr-legend').style.display = 'none';
-    document.getElementById('unhcr-status').textContent = '';
+    ['unhcr-legend','unhcr-legend-m'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.display = 'none';
+    });
+    ['unhcr-status','unhcr-status-m'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    const tm = document.getElementById('unhcr-toggle-m'); if (tm) tm.checked = false;
+    const td = document.getElementById('unhcr-toggle');  if (td) td.checked = false;
   }
 }
 </script>
