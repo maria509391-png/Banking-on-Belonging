@@ -790,28 +790,24 @@ document.getElementById('support-select-m').addEventListener('change', e => { fi
 
 <div id="stats-bar">
   <div class="stat-item">
-    <span class="stat-number" data-target="10" data-suffix="">0</span>
-    <span class="stat-label">Organisations</span>
+    <span class="stat-number" data-target="10" data-suffix="" data-prefix="">0</span>
+    <span class="stat-label">Organisations Mapped</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number" data-target="53" data-suffix="+">0</span>
-    <span class="stat-label">Projects Mapped</span>
+    <span class="stat-number" data-target="53" data-suffix="+" data-prefix="">0</span>
+    <span class="stat-label">Active Projects</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number" data-target="26" data-suffix="">0</span>
-    <span class="stat-label">Countries Covered</span>
+    <span class="stat-number" data-target="7" data-suffix="B+" data-prefix="$">0</span>
+    <span class="stat-label">Combined Annual Funding</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number" data-target="8" data-suffix="">0</span>
-    <span class="stat-label">Regions</span>
+    <span class="stat-number" data-target="130" data-suffix="M+" data-prefix="">0</span>
+    <span class="stat-label">People Supported</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number" data-target="11" data-suffix="">0</span>
-    <span class="stat-label">Types of Support</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-number" data-target="62" data-suffix="+">0</span>
-    <span class="stat-label">Member NGOs (NRG)</span>
+    <span class="stat-number" data-target="188" data-suffix="M" data-prefix="$">0</span>
+    <span class="stat-label">Microloans Disbursed (Kiva)</span>
   </div>
 </div>
 
@@ -820,14 +816,16 @@ document.getElementById('support-select-m').addEventListener('change', e => { fi
 function animateCount(el) {
   const target = +el.dataset.target;
   const suffix = el.dataset.suffix || '';
+  const prefix = el.dataset.prefix || '';
   const duration = 1800;
   const step = 16;
   const increment = target / (duration / step);
   let current = 0;
   const timer = setInterval(() => {
     current = Math.min(current + increment, target);
-    el.textContent = Math.floor(current) + (current >= target ? suffix : '');
-    if (current >= target) clearInterval(timer);
+    const done = current >= target;
+    el.textContent = prefix + Math.floor(current) + (done ? suffix : '');
+    if (done) clearInterval(timer);
   }, step);
 }
 
