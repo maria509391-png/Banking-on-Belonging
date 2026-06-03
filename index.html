@@ -206,22 +206,22 @@
       #stats-bar {
         left: 0;
         height: auto;
-        padding: 10px 12px;
-        flex-wrap: nowrap;
+        padding: 8px 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 0;
-        justify-content: space-around;
-        overflow-x: auto;
       }
-      #map { top: 52px; bottom: 64px; }
+      #map { top: 52px; bottom: 56px; }
       .stat-item {
         border-right: 1px solid rgba(255,255,255,0.15);
-        min-width: auto;
-        flex: 1;
-        padding: 4px 6px;
+        padding: 4px 4px;
+        flex: unset;
+        min-width: unset;
       }
       .stat-item:last-child { border-right: none; }
-      .stat-number { font-size: 0.8rem; }
-      .stat-label { font-size: 0.48rem; letter-spacing: 0.6px; }
+      .stat-number { font-size: 0.85rem; }
+      .stat-label { font-size: 0.42rem; letter-spacing: 0.5px; }
+      .hide-mobile { display: none; }
     }
     /* POPUP */
     .maplibregl-popup-content {
@@ -839,15 +839,15 @@ document.getElementById('support-select-m').addEventListener('change', e => { fi
 <div id="stats-bar">
   <div class="stat-item">
     <span class="stat-number" data-target="53" data-suffix="+" data-prefix="">0</span>
-    <span class="stat-label">Active Projects</span>
+    <span class="stat-label"><span class="hide-mobile">Active </span>Projects</span>
   </div>
   <div class="stat-item">
     <span class="stat-number" data-target="7" data-suffix="B+" data-prefix="$">0</span>
-    <span class="stat-label">Combined Annual Funding</span>
+    <span class="stat-label"><span class="hide-mobile">Combined </span>Annual Funding</span>
   </div>
   <div class="stat-item">
     <span class="stat-number" data-target="130" data-suffix="M+" data-prefix="">0</span>
-    <span class="stat-label">People of Concern (UNHCR)</span>
+    <span class="stat-label">People of Concern</span>
   </div>
 </div>
 
