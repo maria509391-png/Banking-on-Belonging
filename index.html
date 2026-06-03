@@ -143,77 +143,73 @@
       flex-shrink: 0;
     }
 
-    /* MAP — full height, stats float on top */
+    /* MAP */
     #map {
       position: fixed;
       top: 0;
       left: 300px;
       right: 0;
-      bottom: 0;
+      bottom: 72px;
       z-index: 0;
     }
 
-    /* STATS BAR — floats over map, no background at all */
+    /* STATS BAR */
     #stats-bar {
       position: fixed;
-      bottom: 18px;
+      bottom: 0;
       left: 300px;
       right: 0;
-      background: none;
-      border: none;
+      height: 72px;
+      background: #1B2A4A;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-around;
       z-index: 1500;
       padding: 0 24px;
-      pointer-events: none;
     }
 
     .stat-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1px;
+      gap: 2px;
+      flex: 1;
+      border-right: 1px solid rgba(255,255,255,0.15);
+      padding: 0 8px;
     }
-
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700;1,900&display=swap');
+    .stat-item:last-child { border-right: none; }
 
     .stat-number {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       font-weight: 900;
-      font-style: normal;
-      color: #0f2557;
+      color: #ffffff;
       white-space: nowrap;
       font-family: 'Playfair Display', 'Georgia', serif;
-      letter-spacing: -0.5px;
-      text-shadow: 0 0 14px rgba(255,255,255,1), 0 0 4px rgba(255,255,255,1);
+      letter-spacing: -0.3px;
     }
 
     .stat-label {
       font-size: 0.58rem;
       font-weight: 600;
-      font-style: normal;
       text-transform: uppercase;
-      letter-spacing: 1.4px;
-      color: #0f2557;
+      letter-spacing: 1.2px;
+      color: rgba(255,255,255,0.7);
       text-align: center;
       white-space: nowrap;
-      font-family: 'Playfair Display', 'Georgia', serif;
-      text-shadow: 0 0 10px rgba(255,255,255,1), 0 2px 4px rgba(255,255,255,0.9);
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     @media (max-width: 768px) {
       #stats-bar {
         left: 0;
-        bottom: 10px;
-        padding: 0 8px;
+        height: auto;
+        padding: 10px 8px;
         flex-wrap: wrap;
-        gap: 8px 0;
-        justify-content: space-around;
+        gap: 6px;
       }
-      #map { top: 52px; }
-      .stat-item { min-width: 30%; }
-      .stat-number { font-size: 0.85rem; }
+      #map { top: 52px; bottom: 72px; }
+      .stat-item { border-right: none; min-width: 30%; }
+      .stat-number { font-size: 0.9rem; }
       .stat-label { font-size: 0.5rem; }
     }
     /* POPUP */
