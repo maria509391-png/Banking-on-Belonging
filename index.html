@@ -158,9 +158,8 @@
       left: 300px;
       right: 0;
       height: 72px;
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(6px);
-      color: #fff;
+      background: transparent;
+      color: #1B2A4A;
       display: flex;
       align-items: center;
       justify-content: space-around;
@@ -175,7 +174,7 @@
       align-items: center;
       gap: 2px;
       flex: 1;
-      border-right: 1px solid rgba(255,255,255,0.12);
+      border-right: 1px solid rgba(0,0,0,0.1);
       padding: 0 8px;
     }
     .stat-item:last-child { border-right: none; }
@@ -183,18 +182,20 @@
     .stat-number {
       font-size: 1.1rem;
       font-weight: 800;
-      color: #fff;
+      color: #1B2A4A;
       white-space: nowrap;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
     }
 
     .stat-label {
       font-size: 0.6rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      color: rgba(255,255,255,0.65);
+      color: #334155;
       text-align: center;
       white-space: nowrap;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
     }
 
     @media (max-width: 768px) {
