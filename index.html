@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -280,6 +283,24 @@
     .map-pin-wrap { cursor: pointer; transition: transform 0.15s; }
     .map-pin-wrap:hover { transform: scale(1.2) translateY(-3px); }
 
+    /* UNHCR toggle */
+    .unhcr-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .unhcr-toggle-wrap input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #1B2A4A;
+      cursor: pointer;
+    }
+
     /* SEARCH */
     .search-wrap {
       display: flex;
@@ -496,6 +517,16 @@
     <div class="legend-section">
       <div class="legend-title">Color by Region</div>
       <div id="legend"></div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-title">UNHCR Live Data</div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
+        <span>Show Refugee Settlements</span>
+      </label>
+      <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
+      <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
     </div>
 
   </div>
@@ -824,6 +855,91 @@ function animateCount(el) {
 window.addEventListener('load', () => {
   document.querySelectorAll('#stats-bar .stat-number').forEach(el => animateCount(el));
 });
+
+// ── UNHCR LIVE SETTLEMENTS LAYER ──────────────────────
+const UNHCR_POP_TYPES = {
+  52: { label: 'Refugee',          color: '#E8720A' },
+  53: { label: 'Returnee',         color: '#1E9E6B' },
+  54: { label: 'IDP',              color: '#2E6FD4' },
+  55: { label: 'Asylum-seeker',    color: '#7E3FBF' },
+  56: { label: 'Stateless',        color: '#C94040' },
+  57: { label: 'Others of concern',color: '#64748b' },
+};
+
+let unhcrCluster = null;
+let unhcrLoaded  = false;
+
+async function fetchUnhcrPage(offset) {
+  const url = `https://gis.unhcr.org/arcgis/rest/services/core_v2/wrl_prp_p_unhcr_PoC/FeatureServer/0/query`
+    + `?where=1%3D1&outFields=gis_name,iso3,pop_type,latitude_d,longitude_d`
+    + `&resultRecordCount=500&resultOffset=${offset}&f=json`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function loadUnhcrLayer() {
+  const statusEl = document.getElementById('unhcr-status');
+  statusEl.textContent = 'Loading settlements…';
+
+  unhcrCluster = L.markerClusterGroup({ maxClusterRadius: 40, disableClusteringAtZoom: 7 });
+
+  let offset = 0, total = 0;
+  while (true) {
+    const data = await fetchUnhcrPage(offset);
+    const features = data.features || [];
+    features.forEach(f => {
+      const { gis_name, iso3, pop_type, latitude_d, longitude_d } = f.attributes;
+      if (!latitude_d || !longitude_d) return;
+      const pt = UNHCR_POP_TYPES[pop_type] || { label: 'Unknown', color: '#999' };
+      const circle = L.circleMarker([latitude_d, longitude_d], {
+        radius: 5,
+        fillColor: pt.color,
+        color: '#fff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.85,
+      }).bindPopup(`
+        <div style="font-family:'Segoe UI',sans-serif;min-width:160px">
+          <div style="font-weight:800;font-size:0.9rem;margin-bottom:4px">${gis_name || 'Unknown'}</div>
+          <div style="font-size:0.75rem;color:#555">Country: <b>${iso3 || '—'}</b></div>
+          <div style="font-size:0.75rem;color:#555">Type: <b style="color:${pt.color}">${pt.label}</b></div>
+        </div>`);
+      unhcrCluster.addLayer(circle);
+      total++;
+    });
+    if (!data.exceededTransferLimit) break;
+    offset += 500;
+    if (offset > 4000) break; // cap at ~4000 points for performance
+  }
+
+  unhcrCluster.addTo(map);
+  unhcrLoaded = true;
+  statusEl.textContent = `${total.toLocaleString()} settlements loaded`;
+
+  // Build legend
+  const legendEl = document.getElementById('unhcr-legend');
+  legendEl.style.display = 'block';
+  legendEl.innerHTML = Object.values(UNHCR_POP_TYPES).map(pt =>
+    `<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:0.72rem;color:#334155;font-weight:500">
+      <div style="width:10px;height:10px;border-radius:50%;background:${pt.color};flex-shrink:0"></div>${pt.label}
+    </div>`
+  ).join('');
+}
+
+function toggleUnhcrLayer(on) {
+  if (on) {
+    if (!unhcrLoaded) {
+      loadUnhcrLayer();
+    } else {
+      unhcrCluster.addTo(map);
+      document.getElementById('unhcr-legend').style.display = 'block';
+    }
+  } else {
+    if (unhcrCluster) { unhcrCluster.remove(); }
+    document.getElementById('unhcr-legend').style.display = 'none';
+    document.getElementById('unhcr-status').textContent = '';
+  }
+}
 </script>
 
 </body>
