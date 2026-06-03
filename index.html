@@ -141,76 +141,71 @@
       flex-shrink: 0;
     }
 
-    /* MAP — sits to the right of the fixed sidebar */
+    /* MAP — full height, stats float on top */
     #map {
       position: fixed;
       top: 0;
       left: 300px;
       right: 0;
-      bottom: 72px;
+      bottom: 0;
       z-index: 0;
     }
 
-    /* STATS BAR */
+    /* STATS BAR — floats over map, no background at all */
     #stats-bar {
       position: fixed;
-      bottom: 0;
+      bottom: 18px;
       left: 300px;
       right: 0;
-      height: 72px;
-      background: transparent;
-      color: #1B2A4A;
+      background: none;
+      border: none;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-around;
       z-index: 1500;
-      padding: 0 16px;
-      gap: 8px;
+      padding: 0 24px;
+      pointer-events: none;
     }
 
     .stat-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
-      flex: 1;
-      border-right: 1px solid rgba(0,0,0,0.1);
-      padding: 0 8px;
+      gap: 1px;
     }
-    .stat-item:last-child { border-right: none; }
 
     .stat-number {
-      font-size: 1.1rem;
-      font-weight: 800;
+      font-size: 1.15rem;
+      font-weight: 900;
       color: #1B2A4A;
       white-space: nowrap;
-      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+      text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 0 2px 6px rgba(255,255,255,0.9);
     }
 
     .stat-label {
-      font-size: 0.6rem;
+      font-size: 0.58rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
-      color: #334155;
+      color: #1B2A4A;
       text-align: center;
       white-space: nowrap;
-      text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+      text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 0 2px 4px rgba(255,255,255,0.9);
     }
 
     @media (max-width: 768px) {
       #stats-bar {
         left: 0;
-        height: auto;
-        padding: 10px 8px;
+        bottom: 10px;
+        padding: 0 8px;
         flex-wrap: wrap;
-        gap: 6px;
-        bottom: 0;
+        gap: 8px 0;
+        justify-content: space-around;
       }
-      #map { bottom: 0; top: 52px; }
-      .stat-item { border-right: none; min-width: 28%; }
-      .stat-number { font-size: 0.9rem; }
-      .stat-label { font-size: 0.55rem; }
+      #map { top: 52px; }
+      .stat-item { min-width: 30%; }
+      .stat-number { font-size: 0.85rem; }
+      .stat-label { font-size: 0.5rem; }
     }
     /* POPUP */
     .maplibregl-popup-content {
@@ -790,34 +785,51 @@ document.getElementById('support-select-m').addEventListener('change', e => { fi
 
 <div id="stats-bar">
   <div class="stat-item">
-    <span class="stat-number">123.2M</span>
-    <span class="stat-label">Forcibly Displaced</span>
+    <span class="stat-number" data-target="10" data-suffix="">0</span>
+    <span class="stat-label">Organisations</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">42.5M</span>
-    <span class="stat-label">Refugees</span>
+    <span class="stat-number" data-target="53" data-suffix="+">0</span>
+    <span class="stat-label">Projects Mapped</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">67.8M</span>
-    <span class="stat-label">Internally Displaced</span>
+    <span class="stat-number" data-target="26" data-suffix="">0</span>
+    <span class="stat-label">Countries Covered</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">8.4M</span>
-    <span class="stat-label">Asylum Seekers</span>
+    <span class="stat-number" data-target="8" data-suffix="">0</span>
+    <span class="stat-label">Regions</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">49M</span>
-    <span class="stat-label">Are Children</span>
+    <span class="stat-number" data-target="11" data-suffix="">0</span>
+    <span class="stat-label">Types of Support</span>
   </div>
   <div class="stat-item">
-    <span class="stat-number">10</span>
-    <span class="stat-label">Organisations Mapped</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-number">53+</span>
-    <span class="stat-label">Active Projects</span>
+    <span class="stat-number" data-target="62" data-suffix="+">0</span>
+    <span class="stat-label">Member NGOs (NRG)</span>
   </div>
 </div>
+
+<script>
+// Count-up animation
+function animateCount(el) {
+  const target = +el.dataset.target;
+  const suffix = el.dataset.suffix || '';
+  const duration = 1800;
+  const step = 16;
+  const increment = target / (duration / step);
+  let current = 0;
+  const timer = setInterval(() => {
+    current = Math.min(current + increment, target);
+    el.textContent = Math.floor(current) + (current >= target ? suffix : '');
+    if (current >= target) clearInterval(timer);
+  }, step);
+}
+
+window.addEventListener('load', () => {
+  document.querySelectorAll('#stats-bar .stat-number').forEach(el => animateCount(el));
+});
+</script>
 
 </body>
 </html>
