@@ -147,8 +147,68 @@
       top: 0;
       left: 300px;
       right: 0;
-      bottom: 0;
+      bottom: 72px;
       z-index: 0;
+    }
+
+    /* STATS BAR */
+    #stats-bar {
+      position: fixed;
+      bottom: 0;
+      left: 300px;
+      right: 0;
+      height: 72px;
+      background: #1B2A4A;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 1500;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      padding: 0 8px;
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-number {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: rgba(255,255,255,0.65);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      #stats-bar {
+        left: 0;
+        height: auto;
+        padding: 10px 8px;
+        flex-wrap: wrap;
+        gap: 6px;
+        bottom: 0;
+      }
+      #map { bottom: 0; top: 52px; }
+      .stat-item { border-right: none; min-width: 28%; }
+      .stat-number { font-size: 0.9rem; }
+      .stat-label { font-size: 0.55rem; }
     }
     /* POPUP */
     .maplibregl-popup-content {
@@ -725,5 +785,37 @@ document.getElementById('org-select-m').addEventListener('change', e => { filter
 document.getElementById('region-select-m').addEventListener('change', e => { filterRegion = e.target.value; document.getElementById('region-select').value = e.target.value; applyFilters(); });
 document.getElementById('support-select-m').addEventListener('change', e => { filterSupport = e.target.value; document.getElementById('support-select').value = e.target.value; applyFilters(); });
 </script>
+
+<div id="stats-bar">
+  <div class="stat-item">
+    <span class="stat-number">123.2M</span>
+    <span class="stat-label">Forcibly Displaced</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">42.5M</span>
+    <span class="stat-label">Refugees</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">67.8M</span>
+    <span class="stat-label">Internally Displaced</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">8.4M</span>
+    <span class="stat-label">Asylum Seekers</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">49M</span>
+    <span class="stat-label">Are Children</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">10</span>
+    <span class="stat-label">Organisations Mapped</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">53+</span>
+    <span class="stat-label">Active Projects</span>
+  </div>
+</div>
+
 </body>
 </html>
