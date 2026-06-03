@@ -967,6 +967,25 @@ function toggleUnhcrLayer(on) {
     const td = document.getElementById('unhcr-toggle');  if (td) td.checked = false;
   }
 }
+
+// ── MOBILE MENU: close on map tap or swipe up ─────────
+const mobileFilters = document.getElementById('mobile-filters');
+
+// Close when map is tapped
+map.on('click', () => { if (mobileFilters) mobileFilters.removeAttribute('open'); });
+
+// Close on swipe up gesture on the menu itself
+let touchStartY = 0;
+if (mobileFilters) {
+  mobileFilters.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  mobileFilters.addEventListener('touchend', e => {
+    const dy = touchStartY - e.changedTouches[0].clientY;
+    if (dy > 40) mobileFilters.removeAttribute('open'); // swipe up > 40px closes menu
+  }, { passive: true });
+}
 </script>
 
 </body>
