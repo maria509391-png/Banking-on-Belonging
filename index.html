@@ -1058,7 +1058,7 @@ function getProjectsForCountry(iso3) {
 }
 
 async function onCountryClick(e, feature) {
-  const iso3 = feature.properties.id || feature.properties.ISO_A3;
+  const iso3 = feature.id || feature.properties.id || feature.properties.ISO_A3;
   const name = feature.properties.name || iso3;
   if (!iso3 || iso3 === '-99') return;
 
