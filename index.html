@@ -448,25 +448,22 @@
       </select>
     </div>
     <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
-    <div class="legend-section">
-      <div class="legend-title">Color by Region</div>
-      <div id="legend-m"></div>
-    </div>
-    <div class="legend-section">
-      <div class="legend-title">UNHCR Live Data</div>
+    <div class="legend-section" style="margin-top:14px;">
+      <div class="legend-title">Live Data Layers</div>
       <label class="unhcr-toggle-wrap">
         <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
         <span>Show Refugee Settlements</span>
       </label>
-      <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
+      <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:8px;min-height:14px;"></div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
+        <span>Country Refugee Statistics</span>
+      </label>
       <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
     </div>
     <div class="legend-section">
-      <div class="legend-title">Country Statistics</div>
-      <label class="unhcr-toggle-wrap">
-        <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
-        <span>Click a country for refugee data</span>
-      </label>
+      <div class="legend-title">Color by Region</div>
+      <div id="legend-m"></div>
     </div>
   </div>
 </details>
@@ -538,28 +535,24 @@
 
     <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
 
-    <div class="legend-section">
-      <div class="legend-title">Color by Region</div>
-      <div id="legend"></div>
-    </div>
-
-    <div class="legend-section">
-      <div class="legend-title">UNHCR Live Data</div>
+    <div class="legend-section" style="margin-top:14px;">
+      <div class="legend-title">Live Data Layers</div>
       <label class="unhcr-toggle-wrap">
         <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
         <span>Show Refugee Settlements</span>
       </label>
-      <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
+      <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:8px;min-height:14px;"></div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
+        <span>Country Refugee Statistics</span>
+      </label>
+      <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
       <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
     </div>
 
     <div class="legend-section">
-      <div class="legend-title">Country Statistics</div>
-      <label class="unhcr-toggle-wrap">
-        <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
-        <span>Click a country for refugee data</span>
-      </label>
-      <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
+      <div class="legend-title">Color by Region</div>
+      <div id="legend"></div>
     </div>
 
   </div>
