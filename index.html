@@ -1046,7 +1046,7 @@ function fmt(n) {
 }
 
 async function fetchCountryStats(iso3) {
-  const url = `https://api.unhcr.org/population/v1/population/?limit=10&coa=${iso3}&year=2023&cf_type=UNHCR`;
+  const url = `https://api.unhcr.org/population/v1/population/?limit=10&coa=${iso3}&year=2024&cf_type=UNHCR`;
   try {
     const res = await fetch(url);
     const data = await res.json();
@@ -1103,7 +1103,7 @@ async function onCountryClick(e, feature) {
             <div style="font-size:0.55rem;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;font-weight:600">${label}</div>
           </div>`).join('')}
       </div>
-      <div style="font-size:0.6rem;color:#aaa;margin-top:2px">Source: UNHCR 2023</div>`
+      <div style="font-size:0.6rem;color:#aaa;margin-top:2px">Source: UNHCR 2024 (live)</div>`
     : `<div style="font-size:0.75rem;color:#888">No UNHCR data available for this country.</div>`;
 
   popup.setContent(`
