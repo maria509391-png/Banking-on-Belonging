@@ -456,7 +456,10 @@
       </label>
       <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
       <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
-      <p style="font-size:0.7rem;color:#64748b;margin-top:8px;">Click any country on the map to see live refugee statistics.</p>
+      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+        <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
+        <span>Country Refugee Statistics</span>
+      </label>
     </div>
     <div class="legend-section">
       <div class="legend-title">Color by Region</div>
@@ -540,7 +543,11 @@
       </label>
       <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
       <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
-      <p style="font-size:0.7rem;color:#64748b;margin-top:8px;">Click any country on the map to see live refugee statistics.</p>
+      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+        <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
+        <span>Country Refugee Statistics</span>
+      </label>
+      <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
     </div>
 
     <div class="legend-section">
@@ -776,8 +783,6 @@ map.whenReady(function () {
   setFitZoom();
   map.on('resize', setFitZoom);
 
-  // Auto-load country layer so clicking always works
-  toggleCountryLayer(true);
 });
 
 // Mobile legend
