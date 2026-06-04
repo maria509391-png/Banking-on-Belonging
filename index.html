@@ -461,6 +461,13 @@
       <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
       <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
     </div>
+    <div class="legend-section">
+      <div class="legend-title">Country Statistics</div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
+        <span>Click a country for refugee data</span>
+      </label>
+    </div>
   </div>
 </details>
 
@@ -544,6 +551,15 @@
       </label>
       <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
       <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-title">Country Statistics</div>
+      <label class="unhcr-toggle-wrap">
+        <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
+        <span>Click a country for refugee data</span>
+      </label>
+      <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:6px;min-height:16px;"></div>
     </div>
 
   </div>
@@ -965,6 +981,184 @@ function toggleUnhcrLayer(on) {
     });
     const tm = document.getElementById('unhcr-toggle-m'); if (tm) tm.checked = false;
     const td = document.getElementById('unhcr-toggle');  if (td) td.checked = false;
+  }
+}
+
+// ── COUNTRY STATISTICS LAYER ─────────────────────────
+// Maps each project to its country ISO3 code
+const PROJECT_ISO3 = new Map([
+  ['unhcr|Syria Emergency Response',              'SYR'],
+  ['unhcr|Rohingya Response – Cox\'s Bazar',      'BGD'],
+  ['unhcr|South Sudan Displacement Crisis',        'SSD'],
+  ['unhcr|Venezuela Regional Response',            'VEN'],
+  ['unhcr|Ukraine Emergency Operation',            'UKR'],
+  ['unhcr|Ethiopia – Refugee Response',            'ETH'],
+  ['mercy|Syria Resilience & Livelihoods',         'SYR'],
+  ['mercy|Yemen Emergency Food Aid',               'YEM'],
+  ['mercy|Somalia Water & Agriculture',            'SOM'],
+  ['mercy|Jordan – Syrian Refugee Livelihoods',    'JOR'],
+  ['mercy|Colombia – Venezuelan Migrant Support',  'COL'],
+  ['mercy|Nigeria – Northeast Crisis Response',    'NGA'],
+  ['kiva|Kakuma Refugee Loans – Kenya',            'KEN'],
+  ['kiva|Lebanese Syrian Refugee Microfinance',    'LBN'],
+  ['kiva|Jordan Refugee Entrepreneur Loans',       'JOR'],
+  ['kiva|Uganda Women Refugee Fund',               'UGA'],
+  ['kiva|Colombia Displaced Persons Loans',        'COL'],
+  ['tech|Digital Skills Athens',                   'GRC'],
+  ['tech|Tech Talent UK',                          'GBR'],
+  ['tech|Digital Inclusion Kenya',                 'KEN'],
+  ['tech|Jordan Coding Bootcamp',                  'JOR'],
+  ['tech|Berlin Tech Integration',                 'DEU'],
+  ['ri|Ethiopia Advocacy Mission',                 'ETH'],
+  ['ri|Venezuela Crisis Advocacy',                 'VEN'],
+  ['ri|Rohingya Advocacy – Myanmar',               'MMR'],
+  ['ri|Sudan Crisis Response Advocacy',            'SDN'],
+  ['ri|Gaza Protection Advocacy',                  'PSE'],
+  ['nrc|Gaza Emergency Shelter',                   'PSE'],
+  ['nrc|Syria Education & Housing Rights',         'SYR'],
+  ['nrc|South Sudan Education in Emergencies',     'SSD'],
+  ['nrc|Afghanistan Shelter & Legal Aid',          'AFG'],
+  ['nrc|Ukraine Emergency Response',               'UKR'],
+  ['nrc|DRC – Education & Protection',             'COD'],
+  ['global|Refugee Resettlement – Baltimore',      'USA'],
+  ['global|New York Refugee Integration',          'USA'],
+  ['global|Houston Workforce Development',         'USA'],
+  ['global|Miami Asylum Seekers Services',         'USA'],
+  ['global|Chicago Refugee Welcoming Network',     'USA'],
+  ['tent|Germany Corporate Refugee Hiring',        'DEU'],
+  ['tent|USA Refugee Employment Initiative',       'USA'],
+  ['tent|Turkey Syrian Refugee Employment',        'TUR'],
+  ['tent|Brazil Venezuelan Refugee Jobs',          'BRA'],
+  ['tent|UK Refugee Business Integration',         'GBR'],
+  ['drc|Syria Protection & Shelter',               'SYR'],
+  ['drc|Iraq Durable Solutions',                   'IRQ'],
+  ['drc|South Sudan Emergency',                    'SSD'],
+  ['drc|Somalia Resilience Programme',             'SOM'],
+  ['drc|Nigeria Displacement Crisis',              'NGA'],
+  ['drc|Ukraine Emergency Response',               'UKR'],
+  ['drc|Jordan Refugee Livelihoods',               'JOR'],
+  ['drc|Ethiopia Refugee Response',                'ETH'],
+  ['nrg|Kakuma & Kalobeyei Coordination Hub',      'KEN'],
+  ['nrg|Dadaab Refugee Response Network',          'KEN'],
+  ['nrg|Nairobi Urban Refugee Policy Hub',         'KEN'],
+]);
+
+let countryLayer = null;
+let countryLayerLoaded = false;
+
+function fmt(n) {
+  if (!n || n === 0) return '—';
+  return Number(n).toLocaleString();
+}
+
+async function fetchCountryStats(iso3) {
+  const url = `https://api.unhcr.org/population/v1/population/?limit=10&coa=${iso3}&year=2023&cf_type=UNHCR`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.items && data.items[0] ? data.items[0] : null;
+  } catch(e) { return null; }
+}
+
+function getProjectsForCountry(iso3) {
+  return PROJECTS.filter(p => PROJECT_ISO3.get(`${p.org}|${p.name}`) === iso3);
+}
+
+async function onCountryClick(e, feature) {
+  const iso3 = feature.properties.id || feature.properties.ISO_A3;
+  const name = feature.properties.name || iso3;
+  if (!iso3 || iso3 === '-99') return;
+
+  const popup = L.popup({ maxWidth: 320 })
+    .setLatLng(e.latlng)
+    .setContent(`<div style="font-family:'Segoe UI',sans-serif;padding:4px;min-width:240px">
+      <div style="font-weight:800;font-size:1rem;margin-bottom:8px;color:#1B2A4A">${name}</div>
+      <div style="font-size:0.75rem;color:#888;margin-bottom:6px">Loading UNHCR data…</div>
+    </div>`)
+    .openOn(map);
+
+  const stats = await fetchCountryStats(iso3);
+  const projects = getProjectsForCountry(iso3);
+
+  const projectsHTML = projects.length
+    ? `<div style="margin-top:10px;border-top:1px solid #eee;padding-top:8px">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:6px">Projects on this map</div>
+        ${projects.map(p => {
+          const color = REGION_COLORS[p.region] || '#64748b';
+          const orgName = ORGS[p.org].name;
+          const donateUrl = p.donate || ORGS[p.org].donate;
+          return `<div style="margin-bottom:6px;padding:6px 8px;background:#f8fafc;border-radius:8px;border-left:3px solid ${color}">
+            <div style="font-size:0.75rem;font-weight:700;color:#1B2A4A">${p.name}</div>
+            <div style="font-size:0.65rem;color:#64748b;margin-bottom:4px">${orgName}</div>
+            <a href="${donateUrl}" target="_blank" style="font-size:0.65rem;font-weight:700;color:${color};text-decoration:none">Donate →</a>
+          </div>`;
+        }).join('')}
+      </div>`
+    : '';
+
+  const statsHTML = stats
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+        ${[
+          ['Refugees', stats.refugees],
+          ['Asylum Seekers', stats.asylum_seekers],
+          ['Stateless', stats.stateless],
+          ['Total PoC', (stats.refugees||0)+(stats.asylum_seekers||0)+(stats.stateless||0)],
+        ].map(([label, val]) => `
+          <div style="background:#f0f4ff;border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:0.9rem;font-weight:800;color:#1B2A4A">${fmt(val)}</div>
+            <div style="font-size:0.55rem;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;font-weight:600">${label}</div>
+          </div>`).join('')}
+      </div>
+      <div style="font-size:0.6rem;color:#aaa;margin-top:2px">Source: UNHCR 2023</div>`
+    : `<div style="font-size:0.75rem;color:#888">No UNHCR data available for this country.</div>`;
+
+  popup.setContent(`
+    <div style="font-family:'Segoe UI',sans-serif;padding:4px;min-width:260px">
+      <div style="font-weight:800;font-size:1rem;margin-bottom:10px;color:#1B2A4A">${name}</div>
+      ${statsHTML}
+      ${projectsHTML}
+    </div>`);
+}
+
+function toggleCountryLayer(on) {
+  const statusEl = document.getElementById('country-status');
+  if (on) {
+    if (!countryLayerLoaded) {
+      if (statusEl) statusEl.textContent = 'Loading country borders…';
+      fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+        .then(r => r.json())
+        .then(data => {
+          countryLayer = L.geoJSON(data, {
+            style: {
+              fillColor: 'transparent',
+              color: '#94a3b8',
+              weight: 0.8,
+              opacity: 0.5,
+              fillOpacity: 0,
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on({
+                mouseover: e => {
+                  e.target.setStyle({ fillColor: '#1B2A4A', fillOpacity: 0.08, weight: 1.5 });
+                },
+                mouseout: e => {
+                  countryLayer.resetStyle(e.target);
+                },
+                click: e => onCountryClick(e, feature),
+              });
+            }
+          }).addTo(map);
+          countryLayerLoaded = true;
+          if (statusEl) statusEl.textContent = 'Click any country';
+        })
+        .catch(() => { if (statusEl) statusEl.textContent = 'Failed to load borders'; });
+    } else {
+      countryLayer.addTo(map);
+      if (statusEl) statusEl.textContent = 'Click any country';
+    }
+  } else {
+    if (countryLayer) countryLayer.remove();
+    if (statusEl) statusEl.textContent = '';
   }
 }
 
