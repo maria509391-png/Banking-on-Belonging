@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Banking on Belonging</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LSWZB8EV1E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LSWZB8EV1E');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -713,7 +721,8 @@ function buildPopup(p) {
       <div class="popup-desc">${p.desc}</div>
       <div class="popup-tags">${tags}</div>
       <a class="donate-btn" href="${donateUrl}" target="_blank" rel="noopener"
-         style="background:${color};--rc:${color}">
+         style="background:${color};--rc:${color}"
+         onclick="gtag('event','donate_click',{org:'${p.org}',project:'${p.name}',region:'${p.region}'})">
         Donate via ${orgName} &rarr;
       </a>
     </div>`;
@@ -750,9 +759,9 @@ function applyFilters() {
   if (mc) mc.textContent = `${count} project${count !== 1 ? 's' : ''} shown`;
 }
 
-document.getElementById('org-select').addEventListener('change', e => { filterOrg = e.target.value; applyFilters(); });
-document.getElementById('region-select').addEventListener('change', e => { filterRegion = e.target.value; applyFilters(); });
-document.getElementById('support-select').addEventListener('change', e => { filterSupport = e.target.value; applyFilters(); });
+document.getElementById('org-select').addEventListener('change', e => { filterOrg = e.target.value; applyFilters(); if(e.target.value!=='all') gtag('event','filter_org',{org:e.target.value}); });
+document.getElementById('region-select').addEventListener('change', e => { filterRegion = e.target.value; applyFilters(); if(e.target.value!=='all') gtag('event','filter_region',{region:e.target.value}); });
+document.getElementById('support-select').addEventListener('change', e => { filterSupport = e.target.value; applyFilters(); if(e.target.value!=='all') gtag('event','filter_support',{support:e.target.value}); });
 
 function resetFilters() {
   filterOrg = filterRegion = filterSupport = 'all';
@@ -801,6 +810,7 @@ const searchInput = document.getElementById('search-input');
 const searchInputM = document.getElementById('search-input-m');
 
 function onSearch(val) {
+  if(val.trim()) gtag('event','search',{search_term:val.trim()});
   filterSearch = val.trim();
   if (searchInput.value !== val) searchInput.value = val;
   if (searchInputM.value !== val) searchInputM.value = val;
