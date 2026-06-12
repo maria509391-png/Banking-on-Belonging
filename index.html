@@ -771,7 +771,7 @@
             <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
             <span>Refugee Flow Routes</span>
           </label>
-          <button class="info-icon" onclick="showInfo(this,'Animated lines showing how many refugees from one country are hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes. Note: shows cumulative totals hosted, not yearly movements. Data: UNHCR.')">i</button>
+          <button class="info-icon" onclick="showInfo(this,'Animated lines showing the major routes refugees take from their home country to where they are currently hosted. Use the year slider to see how these patterns shifted from 2019 to 2024.')">i</button>
         </div>
       </div>
     </div>
@@ -865,7 +865,7 @@
             <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
             <span>Refugee Settlements</span>
           </label>
-          <button class="info-icon" onclick="showInfo(this,'Live dots showing refugee camps and settlements worldwide. Color-coded by population type: Refugee, IDP, Asylum-seeker, Returnee, Stateless. Data: UNHCR GIS — updates live.')">i</button>
+          <button class="info-icon" onclick="showInfo(this,'Shows where refugee camps and settlements are located around the world, color-coded by population type: Refugee, IDP, Asylum-seeker, Returnee, and Stateless.')">i</button>
         </div>
         <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
         <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
@@ -875,7 +875,7 @@
             <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
             <span>Country Refugee Statistics</span>
           </label>
-          <button class="info-icon" onclick="showInfo(this,'Click any country on the map to see how many refugees, asylum seekers, and stateless persons it hosts. Also shows active projects there. Data: UNHCR 2024 (updated annually).')">i</button>
+          <button class="info-icon" onclick="showInfo(this,'Click any country on the map to see how many refugees, asylum seekers, and stateless persons it currently hosts, plus which projects on this map are active there.')">i</button>
         </div>
         <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
 
@@ -884,7 +884,7 @@
             <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
             <span>Refugee Flow Routes</span>
           </label>
-          <button class="info-icon" onclick="showInfo(this,'Animated lines showing how many refugees from one country are hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes. Note: shows cumulative totals hosted, not yearly movements. Data: UNHCR.')">i</button>
+          <button class="info-icon" onclick="showInfo(this,'Animated lines showing the major routes refugees take from their home country to where they are currently hosted. Use the year slider to see how these patterns shifted from 2019 to 2024.')">i</button>
         </div>
         <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
         <div id="flow-year-wrap" style="display:none;margin-top:8px;">
