@@ -396,6 +396,27 @@
       }
     }
 
+    /* ── MORE FILTERS BUTTON ─────────────────────────── */
+    .more-filters-btn {
+      width: 100%;
+      padding: 9px 12px;
+      background: #f8fafc;
+      color: #1B2A4A;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s, border-color 0.15s;
+      letter-spacing: 0.2px;
+    }
+    .more-filters-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .more-filters-btn.open { background: #1B2A4A; color: #fff; border-color: #1B2A4A; }
+
     /* ── FLOW ARCS ───────────────────────────────────── */
     .flow-arc-glow {
       filter: blur(3px);
@@ -686,21 +707,27 @@
     </div>
     <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
     <div class="legend-section" style="margin-top:14px;">
-      <div class="legend-title">Live Data Layers</div>
-      <label class="unhcr-toggle-wrap">
-        <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
-        <span>Show Refugee Settlements</span>
-      </label>
-      <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
-      <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
-      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-        <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
-        <span>Country Refugee Statistics</span>
-      </label>
-      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-        <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
-        <span>Refugee Flow Routes</span>
-      </label>
+      <button class="more-filters-btn" onclick="toggleAdvanced()">
+        <span id="more-filters-label-m">Show Advanced Layers</span>
+        <span>▾</span>
+      </button>
+      <div id="advanced-layers-m" style="display:none;margin-top:12px;">
+        <div class="legend-title" style="margin-bottom:8px;">Live Data Layers</div>
+        <label class="unhcr-toggle-wrap">
+          <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
+          <span>Refugee Settlements</span>
+        </label>
+        <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
+        <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
+        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+          <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
+          <span>Country Refugee Statistics</span>
+        </label>
+        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+          <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
+          <span>Refugee Flow Routes</span>
+        </label>
+      </div>
     </div>
     <div class="legend-section">
       <div class="legend-title">Color by Region</div>
@@ -776,28 +803,41 @@
 
     <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
 
+    <!-- ADVANCED LAYERS — collapsible -->
     <div class="legend-section" style="margin-top:14px;">
-      <div class="legend-title">Live Data Layers</div>
-      <label class="unhcr-toggle-wrap">
-        <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
-        <span>Show Refugee Settlements</span>
-      </label>
-      <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
-      <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
-      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-        <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
-        <span>Country Refugee Statistics</span>
-      </label>
-      <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
-      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-        <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
-        <span>Refugee Flow Routes</span>
-      </label>
-      <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
-      <div id="flow-year-wrap" style="display:none;margin-top:8px;">
-        <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:5px;">Year: <span id="flow-year-label">2024</span></div>
-        <input type="range" id="flow-year-slider" min="2019" max="2024" value="2024" style="width:100%;accent-color:#1B2A4A;" oninput="onFlowYearChange(this.value)" />
-        <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#94a3b8;margin-top:2px;"><span>2019</span><span>2024</span></div>
+      <button class="more-filters-btn" id="more-filters-btn" onclick="toggleAdvanced()">
+        <span id="more-filters-label">Show Advanced Layers</span>
+        <span id="more-filters-arrow">▾</span>
+      </button>
+
+      <div id="advanced-layers" style="display:none;margin-top:12px;">
+
+        <div class="legend-title" style="margin-bottom:8px;">Live Data Layers</div>
+
+        <label class="unhcr-toggle-wrap">
+          <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
+          <span>Refugee Settlements</span>
+        </label>
+        <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
+        <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
+
+        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+          <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
+          <span>Country Refugee Statistics</span>
+        </label>
+        <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
+
+        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+          <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
+          <span>Refugee Flow Routes</span>
+        </label>
+        <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
+        <div id="flow-year-wrap" style="display:none;margin-top:8px;">
+          <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:5px;">Year: <span id="flow-year-label">2024</span></div>
+          <input type="range" id="flow-year-slider" min="2019" max="2024" value="2024" style="width:100%;accent-color:#1B2A4A;" oninput="onFlowYearChange(this.value)" />
+          <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#94a3b8;margin-top:2px;"><span>2019</span><span>2024</span></div>
+        </div>
+
       </div>
     </div>
 
@@ -1631,6 +1671,24 @@ function toggleCountryLayer(on) {
     if (countryLayer) countryLayer.remove();
     if (statusEl) statusEl.textContent = '';
   }
+}
+
+// ── ADVANCED LAYERS TOGGLE ────────────────────────────
+function toggleAdvanced() {
+  const panel  = document.getElementById('advanced-layers');
+  const panelM = document.getElementById('advanced-layers-m');
+  const btn    = document.getElementById('more-filters-btn');
+  const label  = document.getElementById('more-filters-label');
+  const labelM = document.getElementById('more-filters-label-m');
+  const arrow  = document.getElementById('more-filters-arrow');
+  const open   = panel.style.display === 'none';
+  panel.style.display  = open ? 'block' : 'none';
+  if (panelM) panelM.style.display = open ? 'block' : 'none';
+  if (btn)   btn.classList.toggle('open', open);
+  const txt = open ? 'Hide Advanced Layers' : 'Show Advanced Layers';
+  if (label)  label.textContent  = txt;
+  if (labelM) labelM.textContent = txt;
+  if (arrow)  arrow.textContent  = open ? '▴' : '▾';
 }
 
 // ── REFUGEE FLOW LINES ────────────────────────────────
