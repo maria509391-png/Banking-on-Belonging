@@ -418,53 +418,41 @@
     .more-filters-btn.open { background: #1B2A4A; color: #fff; border-color: #1B2A4A; }
 
     /* ── INFO ICON ───────────────────────────────────── */
-    .info-icon-wrap {
-      position: relative;
-      flex-shrink: 0;
-    }
     .info-icon {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: #e2e8f0;
       color: #1B2A4A;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       font-weight: 800;
       font-style: italic;
       cursor: pointer;
       flex-shrink: 0;
       transition: background 0.15s;
       user-select: none;
+      border: none;
     }
-    .info-icon:hover { background: #1B2A4A; color: #fff; }
-    .info-tooltip {
+    .info-icon:hover, .info-icon.active { background: #1B2A4A; color: #fff; }
+
+    /* Floating tooltip rendered at body level to escape overflow:hidden */
+    #info-floating-tooltip {
       display: none;
-      position: absolute;
-      left: 30px;
-      top: -8px;
-      width: 230px;
+      position: fixed;
       background: #1B2A4A;
       color: #fff;
       font-size: 0.72rem;
-      line-height: 1.55;
+      line-height: 1.6;
       padding: 12px 14px;
       border-radius: 10px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
-      z-index: 9999;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+      z-index: 99999;
+      max-width: 220px;
+      pointer-events: none;
     }
-    .info-tooltip::before {
-      content: '';
-      position: absolute;
-      left: -6px;
-      top: 14px;
-      border-width: 6px 6px 6px 0;
-      border-style: solid;
-      border-color: transparent #1B2A4A transparent transparent;
-    }
-    .info-icon-wrap:hover .info-tooltip { display: block; }
 
     /* ── FLOW ARCS ───────────────────────────────────── */
     .flow-arc-glow {
@@ -767,10 +755,7 @@
             <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
             <span>Refugee Settlements</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip" style="left:auto;right:30px;">Live dots showing refugee camps worldwide. Color = population type. Data: UNHCR GIS (live).</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Live dots showing refugee camps worldwide. Color = population type (Refugee, IDP, Asylum-seeker, etc.). Data: UNHCR GIS — updates live.')">i</button>
         </div>
         <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
         <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
@@ -779,20 +764,14 @@
             <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
             <span>Country Refugee Statistics</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip" style="left:auto;right:30px;">Click any country to see refugee numbers it hosts. Data: UNHCR 2024.</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Click any country on the map to see how many refugees, asylum seekers, and stateless persons it hosts. Also shows active projects in that country. Data: UNHCR 2024 (updated annually).')">i</button>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
           <label class="unhcr-toggle-wrap" style="margin:0;">
             <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
             <span>Refugee Flow Routes</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip" style="left:auto;right:30px;">Animated lines showing refugee movement between countries. Thicker = more people. Use year slider to track 2019–2024.</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Animated lines showing how many refugees from one country are hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes. Note: shows cumulative totals hosted, not yearly movements. Data: UNHCR.')">i</button>
         </div>
       </div>
     </div>
@@ -886,10 +865,7 @@
             <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
             <span>Refugee Settlements</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip">Live dots showing refugee camps and settlements worldwide. Color-coded by population type: Refugee, IDP, Asylum-seeker, Returnee, Stateless. Data: UNHCR GIS (live).</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Live dots showing refugee camps and settlements worldwide. Color-coded by population type: Refugee, IDP, Asylum-seeker, Returnee, Stateless. Data: UNHCR GIS — updates live.')">i</button>
         </div>
         <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
         <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
@@ -899,10 +875,7 @@
             <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
             <span>Country Refugee Statistics</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip">Click any country on the map to see how many refugees, asylum seekers, and stateless persons it hosts. Also shows which projects in this map are active there. Data: UNHCR 2024.</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Click any country on the map to see how many refugees, asylum seekers, and stateless persons it hosts. Also shows active projects there. Data: UNHCR 2024 (updated annually).')">i</button>
         </div>
         <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
 
@@ -911,10 +884,7 @@
             <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
             <span>Refugee Flow Routes</span>
           </label>
-          <div class="info-icon-wrap">
-            <span class="info-icon">i</span>
-            <div class="info-tooltip">Animated lines showing how many refugees from one country are currently hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes over time. Note: shows cumulative totals, not yearly movements. Data: UNHCR.</div>
-          </div>
+          <button class="info-icon" onclick="showInfo(this,'Animated lines showing how many refugees from one country are hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes. Note: shows cumulative totals hosted, not yearly movements. Data: UNHCR.')">i</button>
         </div>
         <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
         <div id="flow-year-wrap" style="display:none;margin-top:8px;">
@@ -933,6 +903,9 @@
 
   </div>
 </div>
+
+<!-- FLOATING INFO TOOLTIP -->
+<div id="info-floating-tooltip"></div>
 
 <!-- TRACK YOUR IMPACT BUTTON -->
 <button id="impact-btn" onclick="openImpact()">
@@ -1757,6 +1730,40 @@ function toggleCountryLayer(on) {
     if (statusEl) statusEl.textContent = '';
   }
 }
+
+// ── INFO ICON TOOLTIP ─────────────────────────────────
+let activeInfoBtn = null;
+const floatingTip = document.getElementById('info-floating-tooltip');
+
+function showInfo(btn, text) {
+  if (activeInfoBtn === btn && floatingTip.style.display === 'block') {
+    hideInfo(); return;
+  }
+  if (activeInfoBtn) activeInfoBtn.classList.remove('active');
+  activeInfoBtn = btn;
+  btn.classList.add('active');
+
+  floatingTip.textContent = text;
+  floatingTip.style.display = 'block';
+
+  const rect = btn.getBoundingClientRect();
+  const tipW = 220;
+  let left = rect.right + 8;
+  if (left + tipW > window.innerWidth - 10) left = rect.left - tipW - 8;
+  let top = rect.top - 8;
+  if (top + 120 > window.innerHeight) top = window.innerHeight - 130;
+  floatingTip.style.left = left + 'px';
+  floatingTip.style.top  = top + 'px';
+}
+
+function hideInfo() {
+  floatingTip.style.display = 'none';
+  if (activeInfoBtn) { activeInfoBtn.classList.remove('active'); activeInfoBtn = null; }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.classList.contains('info-icon')) hideInfo();
+});
 
 // ── ADVANCED LAYERS TOGGLE ────────────────────────────
 function toggleAdvanced() {
