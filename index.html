@@ -396,6 +396,15 @@
       }
     }
 
+    /* ── FLOW ARCS ───────────────────────────────────── */
+    .flow-arc {
+      stroke-dasharray: 10 6;
+      animation: flowDash 1.8s linear infinite;
+    }
+    @keyframes flowDash {
+      to { stroke-dashoffset: -32; }
+    }
+
     /* ── TRACK YOUR IMPACT ───────────────────────────── */
     #impact-btn {
       position: fixed;
@@ -681,6 +690,10 @@
         <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
         <span>Country Refugee Statistics</span>
       </label>
+      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+        <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
+        <span>Refugee Flow Routes</span>
+      </label>
     </div>
     <div class="legend-section">
       <div class="legend-title">Color by Region</div>
@@ -769,6 +782,16 @@
         <span>Country Refugee Statistics</span>
       </label>
       <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
+      <label class="unhcr-toggle-wrap" style="margin-top:8px;">
+        <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
+        <span>Refugee Flow Routes</span>
+      </label>
+      <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
+      <div id="flow-year-wrap" style="display:none;margin-top:8px;">
+        <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:5px;">Year: <span id="flow-year-label">2024</span></div>
+        <input type="range" id="flow-year-slider" min="2019" max="2024" value="2024" style="width:100%;accent-color:#1B2A4A;" oninput="onFlowYearChange(this.value)" />
+        <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#94a3b8;margin-top:2px;"><span>2019</span><span>2024</span></div>
+      </div>
     </div>
 
     <div class="legend-section">
@@ -1601,6 +1624,157 @@ function toggleCountryLayer(on) {
     if (countryLayer) countryLayer.remove();
     if (statusEl) statusEl.textContent = '';
   }
+}
+
+// ── REFUGEE FLOW LINES ────────────────────────────────
+// Major documented refugee corridors (origin ISO3 → asylum ISO3)
+// Numbers fetched live from UNHCR API per selected year
+const FLOW_CORRIDORS = [
+  { coo:'SYR', coa:'TUR', label:'Syria → Turkey' },
+  { coo:'SYR', coa:'LBN', label:'Syria → Lebanon' },
+  { coo:'SYR', coa:'JOR', label:'Syria → Jordan' },
+  { coo:'SYR', coa:'DEU', label:'Syria → Germany' },
+  { coo:'AFG', coa:'PAK', label:'Afghanistan → Pakistan' },
+  { coo:'AFG', coa:'IRN', label:'Afghanistan → Iran' },
+  { coo:'AFG', coa:'DEU', label:'Afghanistan → Germany' },
+  { coo:'VEN', coa:'COL', label:'Venezuela → Colombia' },
+  { coo:'VEN', coa:'PER', label:'Venezuela → Peru' },
+  { coo:'VEN', coa:'ECU', label:'Venezuela → Ecuador' },
+  { coo:'SSD', coa:'UGA', label:'S. Sudan → Uganda' },
+  { coo:'SSD', coa:'ETH', label:'S. Sudan → Ethiopia' },
+  { coo:'SSD', coa:'SDN', label:'S. Sudan → Sudan' },
+  { coo:'MMR', coa:'BGD', label:'Myanmar → Bangladesh' },
+  { coo:'SDN', coa:'TCD', label:'Sudan → Chad' },
+  { coo:'SDN', coa:'EGY', label:'Sudan → Egypt' },
+  { coo:'SOM', coa:'KEN', label:'Somalia → Kenya' },
+  { coo:'SOM', coa:'ETH', label:'Somalia → Ethiopia' },
+  { coo:'COD', coa:'UGA', label:'DR Congo → Uganda' },
+  { coo:'UKR', coa:'POL', label:'Ukraine → Poland' },
+  { coo:'UKR', coa:'DEU', label:'Ukraine → Germany' },
+  { coo:'ERI', coa:'ETH', label:'Eritrea → Ethiopia' },
+  { coo:'CAF', coa:'CMR', label:'C. Africa → Cameroon' },
+];
+
+// Country centroids [lat, lng]
+const COUNTRY_CENTROIDS = {
+  SYR:[34.80, 38.99], TUR:[38.96, 35.24], LBN:[33.85, 35.86], JOR:[31.24, 36.51],
+  DEU:[51.16, 10.45], AFG:[33.93, 67.71], PAK:[30.37, 69.34], IRN:[32.42, 53.68],
+  VEN:[6.42, -66.58], COL:[4.57, -74.29], PER:[-9.19, -75.01], ECU:[-1.83, -78.18],
+  SSD:[6.87, 31.57], UGA:[1.37, 32.29], ETH:[9.14, 40.48], SDN:[12.86, 30.21],
+  MMR:[16.87, 96.08], BGD:[23.68, 90.35], TCD:[15.45, 18.73], EGY:[26.82, 30.80],
+  SOM:[5.15, 46.19], KEN:[-0.02, 37.90], COD:[-4.03, 21.75], UKR:[48.38, 31.16],
+  POL:[51.92, 19.14], ERI:[15.18, 39.78], CAF:[6.61, 20.93], CMR:[3.85, 11.50],
+};
+
+// Region color per origin country
+const FLOW_COLORS = {
+  SYR:'#D4860A', LBN:'#D4860A', JOR:'#D4860A',
+  AFG:'#7E3FBF', PAK:'#7E3FBF', IRN:'#7E3FBF',
+  VEN:'#C94040', COL:'#C94040',
+  SSD:'#1E9E6B', UGA:'#1E9E6B', ETH:'#1E9E6B', SDN:'#1E9E6B',
+  MMR:'#0E95B0', BGD:'#0E95B0',
+  SOM:'#D4621A', COD:'#D4621A', CAF:'#D4621A',
+  UKR:'#2E6FD4', POL:'#2E6FD4',
+  ERI:'#1E9E6B',
+};
+
+let flowLayers = [];
+let flowLoaded = false;
+let currentFlowYear = 2024;
+
+// Draw a curved animated arc between two lat/lng points
+function drawFlowArc(map, from, to, color, weight, label, count) {
+  const latlngs = buildArcPoints(from, to, 50);
+  const line = L.polyline(latlngs, {
+    color, weight: Math.max(1, Math.min(weight, 8)),
+    opacity: 0.75, smoothFactor: 1,
+    className: 'flow-arc'
+  }).addTo(map);
+
+  const countStr = count >= 1000000
+    ? (count/1000000).toFixed(1)+'M'
+    : count >= 1000
+    ? Math.round(count/1000)+'K'
+    : count.toLocaleString();
+
+  line.bindTooltip(`<strong>${label}</strong><br>${countStr} refugees (${currentFlowYear})<br><span style="font-size:0.68rem;color:#94a3b8;">Source: UNHCR ${currentFlowYear}</span>`, { sticky: true });
+  return line;
+}
+
+function buildArcPoints(from, to, steps) {
+  const points = [];
+  // mid-point offset for curve
+  const midLat = (from[0] + to[0]) / 2;
+  const midLng = (from[1] + to[1]) / 2;
+  const dlat = to[0] - from[0];
+  const dlng = to[1] - from[1];
+  const curveLat = midLat - dlng * 0.25;
+  const curveLng = midLng + dlat * 0.25;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const lat = (1-t)*(1-t)*from[0] + 2*(1-t)*t*curveLat + t*t*to[0];
+    const lng = (1-t)*(1-t)*from[1] + 2*(1-t)*t*curveLng + t*t*to[1];
+    points.push([lat, lng]);
+  }
+  return points;
+}
+
+async function loadFlowYear(year) {
+  const statusEl = document.getElementById('flow-status');
+  if (statusEl) statusEl.textContent = `Loading ${year} flow data…`;
+
+  // Remove existing arcs
+  flowLayers.forEach(l => map.removeLayer(l));
+  flowLayers = [];
+
+  // Find max count for scaling line width
+  const counts = [];
+  const results = await Promise.all(
+    FLOW_CORRIDORS.map(async c => {
+      try {
+        const url = `https://api.unhcr.org/population/v1/population/?limit=1&year=${year}&coo=${c.coo}&coa=${c.coa}&cf_type=UNHCR`;
+        const r = await fetch(url);
+        const d = await r.json();
+        const count = d.items?.[0]?.refugees || 0;
+        return { ...c, count };
+      } catch { return { ...c, count: 0 }; }
+    })
+  );
+
+  const maxCount = Math.max(...results.map(r => r.count), 1);
+
+  results.forEach(c => {
+    if (!c.count) return;
+    const from = COUNTRY_CENTROIDS[c.coo];
+    const to   = COUNTRY_CENTROIDS[c.coa];
+    if (!from || !to) return;
+    const color  = FLOW_COLORS[c.coo] || '#1B2A4A';
+    const weight = 1 + (c.count / maxCount) * 7;
+    const arc = drawFlowArc(map, from, to, color, weight, c.label, c.count);
+    flowLayers.push(arc);
+  });
+
+  const showing = results.filter(r => r.count > 0).length;
+  if (statusEl) statusEl.textContent = `${showing} corridors shown · UNHCR ${year}`;
+  document.getElementById('flow-year-wrap').style.display = 'block';
+}
+
+async function toggleFlowLayer(on) {
+  const statusEl = document.getElementById('flow-status');
+  if (on) {
+    await loadFlowYear(currentFlowYear);
+  } else {
+    flowLayers.forEach(l => map.removeLayer(l));
+    flowLayers = [];
+    if (statusEl) statusEl.textContent = '';
+    document.getElementById('flow-year-wrap').style.display = 'none';
+  }
+}
+
+async function onFlowYearChange(year) {
+  currentFlowYear = parseInt(year);
+  document.getElementById('flow-year-label').textContent = year;
+  await loadFlowYear(year);
 }
 
 // ── MOBILE MENU: close on map tap or swipe up ─────────
