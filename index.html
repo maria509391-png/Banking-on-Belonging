@@ -1789,7 +1789,7 @@ async function loadFlowYear(year) {
       const to   = COUNTRY_CENTROIDS[c.coa];
       if (!from || !to) return;
       const color  = FLOW_COLORS[c.coo] || '#1B2A4A';
-      const weight = 1.5 + (c.count / maxCount) * 7;
+      const weight = 1.5 + (c.count / maxCount) * 4;
       drawFlowArc(from, to, color, weight, c.label, c.count);
     });
 
