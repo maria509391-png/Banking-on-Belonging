@@ -417,6 +417,55 @@
     .more-filters-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
     .more-filters-btn.open { background: #1B2A4A; color: #fff; border-color: #1B2A4A; }
 
+    /* ── INFO ICON ───────────────────────────────────── */
+    .info-icon-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .info-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      color: #1B2A4A;
+      font-size: 0.72rem;
+      font-weight: 800;
+      font-style: italic;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .info-icon:hover { background: #1B2A4A; color: #fff; }
+    .info-tooltip {
+      display: none;
+      position: absolute;
+      left: 30px;
+      top: -8px;
+      width: 230px;
+      background: #1B2A4A;
+      color: #fff;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+      z-index: 9999;
+    }
+    .info-tooltip::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 14px;
+      border-width: 6px 6px 6px 0;
+      border-style: solid;
+      border-color: transparent #1B2A4A transparent transparent;
+    }
+    .info-icon-wrap:hover .info-tooltip { display: block; }
+
     /* ── FLOW ARCS ───────────────────────────────────── */
     .flow-arc-glow {
       filter: blur(3px);
@@ -805,10 +854,27 @@
 
     <!-- ADVANCED LAYERS — collapsible -->
     <div class="legend-section" style="margin-top:14px;">
-      <button class="more-filters-btn" id="more-filters-btn" onclick="toggleAdvanced()">
-        <span id="more-filters-label">Show Advanced Layers</span>
-        <span id="more-filters-arrow">▾</span>
-      </button>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <button class="more-filters-btn" id="more-filters-btn" onclick="toggleAdvanced()" style="flex:1;">
+          <span id="more-filters-label">Show Advanced Layers</span>
+          <span id="more-filters-arrow">▾</span>
+        </button>
+        <div class="info-icon-wrap">
+          <span class="info-icon">i</span>
+          <div class="info-tooltip">
+            <strong>How to read these layers:</strong>
+            <br><br>
+            🔵 <strong>Refugee Settlements</strong><br>
+            Live dots from UNHCR showing where refugee camps and settlements are located. Color = population type (refugee, IDP, asylum seeker, etc.).
+            <br><br>
+            🌍 <strong>Country Refugee Statistics</strong><br>
+            Click any country to see how many refugees it hosts, sourced from UNHCR's 2024 database.
+            <br><br>
+            ➡️ <strong>Refugee Flow Routes</strong><br>
+            Curved lines showing how many refugees from one country are currently living in another. Thicker line = more people. Use the year slider to see how this changed from 2019–2024. <em>Note: this shows cumulative totals hosted, not yearly movements.</em>
+          </div>
+        </div>
+      </div>
 
       <div id="advanced-layers" style="display:none;margin-top:12px;">
 
