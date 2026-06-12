@@ -762,20 +762,38 @@
       </button>
       <div id="advanced-layers-m" style="display:none;margin-top:12px;">
         <div class="legend-title" style="margin-bottom:8px;">Live Data Layers</div>
-        <label class="unhcr-toggle-wrap">
-          <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
-          <span>Refugee Settlements</span>
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="unhcr-toggle-m" onchange="document.getElementById('unhcr-toggle').checked=this.checked; toggleUnhcrLayer(this.checked)" />
+            <span>Refugee Settlements</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip" style="left:auto;right:30px;">Live dots showing refugee camps worldwide. Color = population type. Data: UNHCR GIS (live).</div>
+          </div>
+        </div>
         <div id="unhcr-status-m" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
         <div id="unhcr-legend-m" style="display:none;margin-top:8px;"></div>
-        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-          <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
-          <span>Country Refugee Statistics</span>
-        </label>
-        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-          <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
-          <span>Refugee Flow Routes</span>
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="country-toggle-m" onchange="document.getElementById('country-toggle').checked=this.checked; toggleCountryLayer(this.checked)" />
+            <span>Country Refugee Statistics</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip" style="left:auto;right:30px;">Click any country to see refugee numbers it hosts. Data: UNHCR 2024.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="flow-toggle-m" onchange="document.getElementById('flow-toggle').checked=this.checked; toggleFlowLayer(this.checked)" />
+            <span>Refugee Flow Routes</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip" style="left:auto;right:30px;">Animated lines showing refugee movement between countries. Thicker = more people. Use year slider to track 2019–2024.</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="legend-section">
@@ -854,49 +872,50 @@
 
     <!-- ADVANCED LAYERS — collapsible -->
     <div class="legend-section" style="margin-top:14px;">
-      <div style="display:flex;align-items:center;gap:7px;">
-        <button class="more-filters-btn" id="more-filters-btn" onclick="toggleAdvanced()" style="flex:1;">
-          <span id="more-filters-label">Show Advanced Layers</span>
-          <span id="more-filters-arrow">▾</span>
-        </button>
-        <div class="info-icon-wrap">
-          <span class="info-icon">i</span>
-          <div class="info-tooltip">
-            <strong>How to read these layers:</strong>
-            <br><br>
-            🔵 <strong>Refugee Settlements</strong><br>
-            Live dots from UNHCR showing where refugee camps and settlements are located. Color = population type (refugee, IDP, asylum seeker, etc.).
-            <br><br>
-            🌍 <strong>Country Refugee Statistics</strong><br>
-            Click any country to see how many refugees it hosts, sourced from UNHCR's 2024 database.
-            <br><br>
-            ➡️ <strong>Refugee Flow Routes</strong><br>
-            Curved lines showing how many refugees from one country are currently living in another. Thicker line = more people. Use the year slider to see how this changed from 2019–2024. <em>Note: this shows cumulative totals hosted, not yearly movements.</em>
-          </div>
-        </div>
-      </div>
+      <button class="more-filters-btn" id="more-filters-btn" onclick="toggleAdvanced()">
+        <span id="more-filters-label">Show Advanced Layers</span>
+        <span id="more-filters-arrow">▾</span>
+      </button>
 
       <div id="advanced-layers" style="display:none;margin-top:12px;">
 
         <div class="legend-title" style="margin-bottom:8px;">Live Data Layers</div>
 
-        <label class="unhcr-toggle-wrap">
-          <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
-          <span>Refugee Settlements</span>
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="unhcr-toggle" onchange="toggleUnhcrLayer(this.checked)" />
+            <span>Refugee Settlements</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip">Live dots showing refugee camps and settlements worldwide. Color-coded by population type: Refugee, IDP, Asylum-seeker, Returnee, Stateless. Data: UNHCR GIS (live).</div>
+          </div>
+        </div>
         <div id="unhcr-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;margin-bottom:4px;min-height:14px;"></div>
         <div id="unhcr-legend" style="display:none;margin-top:8px;"></div>
 
-        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-          <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
-          <span>Country Refugee Statistics</span>
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="country-toggle" onchange="toggleCountryLayer(this.checked)" />
+            <span>Country Refugee Statistics</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip">Click any country on the map to see how many refugees, asylum seekers, and stateless persons it hosts. Also shows which projects in this map are active there. Data: UNHCR 2024.</div>
+          </div>
+        </div>
         <div id="country-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
 
-        <label class="unhcr-toggle-wrap" style="margin-top:8px;">
-          <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
-          <span>Refugee Flow Routes</span>
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+          <label class="unhcr-toggle-wrap" style="margin:0;">
+            <input type="checkbox" id="flow-toggle" onchange="toggleFlowLayer(this.checked)" />
+            <span>Refugee Flow Routes</span>
+          </label>
+          <div class="info-icon-wrap">
+            <span class="info-icon">i</span>
+            <div class="info-tooltip">Animated lines showing how many refugees from one country are currently hosted in another. Thicker line = more people. Use the year slider (2019–2024) to track changes over time. Note: shows cumulative totals, not yearly movements. Data: UNHCR.</div>
+          </div>
+        </div>
         <div id="flow-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;min-height:14px;"></div>
         <div id="flow-year-wrap" style="display:none;margin-top:8px;">
           <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:5px;">Year: <span id="flow-year-label">2024</span></div>
