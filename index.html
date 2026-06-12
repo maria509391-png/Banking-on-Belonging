@@ -397,12 +397,19 @@
     }
 
     /* ── FLOW ARCS ───────────────────────────────────── */
-    .flow-arc {
-      stroke-dasharray: 10 6;
-      animation: flowDash 1.8s linear infinite;
+    .flow-arc-glow {
+      filter: blur(3px);
+      opacity: 0.35;
+    }
+    .flow-arc-core {
+      stroke-dasharray: 8 5;
+      animation: flowDash 1.2s linear infinite;
     }
     @keyframes flowDash {
-      to { stroke-dashoffset: -32; }
+      to { stroke-dashoffset: -26; }
+    }
+    .flow-dot {
+      transition: none;
     }
 
     /* ── TRACK YOUR IMPACT ───────────────────────────── */
@@ -1679,37 +1686,17 @@ const FLOW_COLORS = {
 };
 
 let flowLayers = [];
-let flowLoaded = false;
+let flowDotIntervals = [];
 let currentFlowYear = 2024;
-
-// Draw a curved animated arc between two lat/lng points
-function drawFlowArc(map, from, to, color, weight, label, count) {
-  const latlngs = buildArcPoints(from, to, 50);
-  const line = L.polyline(latlngs, {
-    color, weight: Math.max(1, Math.min(weight, 8)),
-    opacity: 0.75, smoothFactor: 1,
-    className: 'flow-arc'
-  }).addTo(map);
-
-  const countStr = count >= 1000000
-    ? (count/1000000).toFixed(1)+'M'
-    : count >= 1000
-    ? Math.round(count/1000)+'K'
-    : count.toLocaleString();
-
-  line.bindTooltip(`<strong>${label}</strong><br>${countStr} refugees (${currentFlowYear})<br><span style="font-size:0.68rem;color:#94a3b8;">Source: UNHCR ${currentFlowYear}</span>`, { sticky: true });
-  return line;
-}
 
 function buildArcPoints(from, to, steps) {
   const points = [];
-  // mid-point offset for curve
   const midLat = (from[0] + to[0]) / 2;
   const midLng = (from[1] + to[1]) / 2;
   const dlat = to[0] - from[0];
   const dlng = to[1] - from[1];
-  const curveLat = midLat - dlng * 0.25;
-  const curveLng = midLng + dlat * 0.25;
+  const curveLat = midLat - dlng * 0.3;
+  const curveLng = midLng + dlat * 0.3;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
     const lat = (1-t)*(1-t)*from[0] + 2*(1-t)*t*curveLat + t*t*to[0];
@@ -1719,16 +1706,66 @@ function buildArcPoints(from, to, steps) {
   return points;
 }
 
-async function loadFlowYear(year) {
-  const statusEl = document.getElementById('flow-status');
-  if (statusEl) statusEl.textContent = `Loading ${year} flow data…`;
+function formatCount(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000)    return Math.round(n/1000)+'K';
+  return n.toLocaleString();
+}
 
-  // Remove existing arcs
+function drawFlowArc(from, to, color, weight, label, count) {
+  const pts = buildArcPoints(from, to, 80);
+  const tip = `<strong>${label}</strong><br>
+    <span style="font-size:0.82rem;font-weight:700;color:${color}">${formatCount(count)}</span> refugees
+    <br><span style="font-size:0.68rem;color:#94a3b8">UNHCR ${currentFlowYear}</span>`;
+
+  // Glow layer — thick, blurred, low opacity for halo effect
+  const glow = L.polyline(pts, {
+    color, weight: weight * 3,
+    opacity: 0.18, smoothFactor: 1,
+    className: 'flow-arc-glow', interactive: false
+  }).addTo(map);
+
+  // Core animated dashed line
+  const core = L.polyline(pts, {
+    color, weight: Math.max(1.5, weight),
+    opacity: 0.92, smoothFactor: 1,
+    className: 'flow-arc-core'
+  }).addTo(map);
+  core.bindTooltip(tip, { sticky: true });
+
+  // Travelling dot along the arc
+  const dotRadius = Math.max(3.5, weight * 0.9);
+  const dot = L.circleMarker(pts[0], {
+    radius: dotRadius,
+    color: '#fff', weight: 2,
+    fillColor: color, fillOpacity: 1,
+    interactive: false
+  }).addTo(map);
+
+  // Animate dot — speed proportional to flow size
+  let idx = 0;
+  const speed = Math.max(15, 55 - weight * 3);
+  const interval = setInterval(() => {
+    idx = (idx + 1) % pts.length;
+    dot.setLatLng(pts[idx]);
+  }, speed);
+
+  flowDotIntervals.push(interval);
+  flowLayers.push(glow, core, dot);
+}
+
+function clearFlowLayers() {
+  flowDotIntervals.forEach(i => clearInterval(i));
+  flowDotIntervals = [];
   flowLayers.forEach(l => map.removeLayer(l));
   flowLayers = [];
+}
 
-  // Find max count for scaling line width
-  const counts = [];
+async function loadFlowYear(year) {
+  const statusEl = document.getElementById('flow-status');
+  if (statusEl) statusEl.textContent = `Loading ${year} data…`;
+  clearFlowLayers();
+
   const results = await Promise.all(
     FLOW_CORRIDORS.map(async c => {
       try {
@@ -1743,29 +1780,30 @@ async function loadFlowYear(year) {
 
   const maxCount = Math.max(...results.map(r => r.count), 1);
 
-  results.forEach(c => {
-    if (!c.count) return;
-    const from = COUNTRY_CENTROIDS[c.coo];
-    const to   = COUNTRY_CENTROIDS[c.coa];
-    if (!from || !to) return;
-    const color  = FLOW_COLORS[c.coo] || '#1B2A4A';
-    const weight = 1 + (c.count / maxCount) * 7;
-    const arc = drawFlowArc(map, from, to, color, weight, c.label, c.count);
-    flowLayers.push(arc);
-  });
+  // Draw smallest first so biggest corridors appear on top
+  results
+    .filter(c => c.count > 0)
+    .sort((a, b) => a.count - b.count)
+    .forEach(c => {
+      const from = COUNTRY_CENTROIDS[c.coo];
+      const to   = COUNTRY_CENTROIDS[c.coa];
+      if (!from || !to) return;
+      const color  = FLOW_COLORS[c.coo] || '#1B2A4A';
+      const weight = 1.5 + (c.count / maxCount) * 7;
+      drawFlowArc(from, to, color, weight, c.label, c.count);
+    });
 
   const showing = results.filter(r => r.count > 0).length;
-  if (statusEl) statusEl.textContent = `${showing} corridors shown · UNHCR ${year}`;
+  if (statusEl) statusEl.textContent = `${showing} corridors · UNHCR ${year}`;
   document.getElementById('flow-year-wrap').style.display = 'block';
 }
 
 async function toggleFlowLayer(on) {
-  const statusEl = document.getElementById('flow-status');
   if (on) {
     await loadFlowYear(currentFlowYear);
   } else {
-    flowLayers.forEach(l => map.removeLayer(l));
-    flowLayers = [];
+    clearFlowLayers();
+    const statusEl = document.getElementById('flow-status');
     if (statusEl) statusEl.textContent = '';
     document.getElementById('flow-year-wrap').style.display = 'none';
   }
