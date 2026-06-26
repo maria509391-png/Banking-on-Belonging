@@ -1210,32 +1210,21 @@ const searchInputM = document.getElementById('search-input-m');
 // Highlight layer for country search
 let searchHighlightLayer = null;
 
-function zoomToCountry(q) {
-  if (!worldGeoJSON) return false;
-  const match = worldGeoJSON.features.find(f =>
+function applyCountryHighlight(geoData, q) {
+  const match = geoData.features.find(f =>
     f.properties.name.toLowerCase() === q.toLowerCase() ||
-    f.properties.name.toLowerCase().includes(q.toLowerCase())
+    f.properties.name.toLowerCase().startsWith(q.toLowerCase())
   );
   if (!match) return false;
 
-  // Remove previous highlight
   if (searchHighlightLayer) { map.removeLayer(searchHighlightLayer); searchHighlightLayer = null; }
 
-  // Add highlight layer
   searchHighlightLayer = L.geoJSON(match, {
-    style: {
-      fillColor: '#6366F1',
-      fillOpacity: 0.25,
-      color: '#6366F1',
-      weight: 2.5,
-      opacity: 0.9
-    },
+    style: { fillColor: '#6366F1', fillOpacity: 0.25, color: '#6366F1', weight: 2.5, opacity: 0.9 },
     interactive: false
   }).addTo(map);
 
-  // Zoom to country
   map.fitBounds(searchHighlightLayer.getBounds(), { padding: [40, 40], maxZoom: 7 });
-
   return true;
 }
 
@@ -1250,27 +1239,38 @@ function onSearch(val) {
   const resultElM = document.getElementById('search-result-m');
 
   if (filterSearch) {
+    const q = filterSearch;
     const matched = markers.filter(m => {
       const p = m.projectData;
-      const q = filterSearch.toLowerCase();
       return [p.name, p.region, p.desc, ORGS[p.org].name, ...p.support]
-        .some(s => s.toLowerCase().includes(q));
+        .some(s => s.toLowerCase().includes(q.toLowerCase()));
     });
 
-    // Try country zoom first
-    const zoomedToCountry = zoomToCountry(filterSearch);
+    // Try country zoom — works even if GeoJSON is still loading
+    getWorldGeoJSON().then(geoData => {
+      const zoomedToCountry = applyCountryHighlight(geoData, q);
 
-    const msg = matched.length
-      ? `${matched.length} project${matched.length !== 1 ? 's' : ''} found`
-      : zoomedToCountry ? 'Country found — no projects here yet' : 'No results found';
-    if (resultEl)  resultEl.textContent  = msg;
-    if (resultElM) resultElM.textContent = msg;
+      const msg = matched.length
+        ? `${matched.length} project${matched.length !== 1 ? 's' : ''} found`
+        : zoomedToCountry ? 'Country found — no projects here yet' : 'No results found';
+      if (resultEl)  resultEl.textContent  = msg;
+      if (resultElM) resultElM.textContent = msg;
 
-    // Zoom to matched pins only if no country match
-    if (!zoomedToCountry && matched.length > 0) {
-      const group = L.featureGroup(matched);
-      map.fitBounds(group.getBounds().pad(0.3));
-    }
+      // Zoom to pins only if no country match
+      if (!zoomedToCountry && matched.length > 0) {
+        const group = L.featureGroup(matched);
+        map.fitBounds(group.getBounds().pad(0.3));
+      }
+    }).catch(() => {
+      // GeoJSON failed — fall back to pin zoom only
+      if (matched.length > 0) {
+        const group = L.featureGroup(matched);
+        map.fitBounds(group.getBounds().pad(0.3));
+      }
+      const msg = matched.length ? `${matched.length} project${matched.length !== 1 ? 's' : ''} found` : 'No results found';
+      if (resultEl)  resultEl.textContent  = msg;
+      if (resultElM) resultElM.textContent = msg;
+    });
 
     // Close mobile panel so user can see the map
     const mf = document.getElementById('mobile-filters');
@@ -1685,11 +1685,19 @@ const PROJECT_ISO3 = new Map([
 let countryLayer = null;
 let countryLayerLoaded = false;
 let worldGeoJSON = null; // cached for country search zoom
+const GEOJSON_URL = 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
+let worldGeoJSONPromise = null;
 
-// Pre-load world GeoJSON for search zoom (lightweight, cached)
-fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
-  .then(r => r.json()).then(d => { worldGeoJSON = d; })
-  .catch(() => {});
+function getWorldGeoJSON() {
+  if (worldGeoJSON) return Promise.resolve(worldGeoJSON);
+  if (!worldGeoJSONPromise) {
+    worldGeoJSONPromise = fetch(GEOJSON_URL).then(r => r.json()).then(d => { worldGeoJSON = d; return d; });
+  }
+  return worldGeoJSONPromise;
+}
+
+// Pre-load immediately
+getWorldGeoJSON().catch(() => {});
 
 function fmt(n) {
   if (!n || n === 0) return '—';
@@ -1770,8 +1778,7 @@ function toggleCountryLayer(on) {
   if (on) {
     if (!countryLayerLoaded) {
       if (statusEl) statusEl.textContent = 'Loading country borders…';
-      fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
-        .then(r => r.json())
+      getWorldGeoJSON()
         .then(data => {
           countryLayer = L.geoJSON(data, {
             style: {
