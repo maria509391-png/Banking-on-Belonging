@@ -953,7 +953,7 @@
 </div>
 
 <div id="map"></div>
-<div id="globe-container" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#dbeafe;z-index:999;">
+<div id="globe-container" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#d5e8eb;z-index:999;">
   <div id="globe-el" style="width:100%;height:100%;"></div>
   <button onclick="toggleGlobe(false)" style="position:absolute;top:20px;right:20px;background:#1B2A4A;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:0.9rem;cursor:pointer;z-index:1000;font-weight:600;">✕ Back to Map</button>
   <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);color:#1B2A4A;font-size:0.85rem;opacity:0.7;pointer-events:none;">Drag to rotate · Scroll to zoom</div>
@@ -2104,7 +2104,7 @@ function toggleGlobe(show) {
 
     // Init globe immediately with white base, then load countries
     globeInstance = GlobeFn()(el)
-      .backgroundColor('#dbeafe')
+      .backgroundColor('#d5e8eb')
       .globeImageUrl('')
       .showAtmosphere(true)
       .atmosphereColor('#6fa8dc')
@@ -2117,8 +2117,8 @@ function toggleGlobe(show) {
       .pointLabel(d => `<div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;max-width:200px"><b>${d.name}</b><br/><span style="opacity:0.8">${d.org}</span><br/><span style="opacity:0.6;font-size:0.72rem">${d.region}</span></div>`)
       .onPointClick(d => { toggleGlobe(false); map.setView([d.lat, d.lng], 5); });
 
-    // Set globe (ocean) color to white
-    globeInstance.globeMaterial().color.set('#ffffff');
+    // Set globe (ocean) color to match flat map water
+    globeInstance.globeMaterial().color.set('#d5e8eb');
 
     globeInstance.controls().autoRotate = true;
     globeInstance.controls().autoRotateSpeed = 0.5;
