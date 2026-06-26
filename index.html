@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.31.1/dist/globe.gl.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -952,6 +953,14 @@
 </div>
 
 <div id="map"></div>
+<div id="globe-container" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0f1e;z-index:999;">
+  <div id="globe-el" style="width:100%;height:100%;"></div>
+  <button onclick="toggleGlobe(false)" style="position:absolute;top:20px;right:20px;background:#1B2A4A;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:0.9rem;cursor:pointer;z-index:1000;font-weight:600;">✕ Back to Map</button>
+  <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:0.85rem;opacity:0.6;pointer-events:none;">Drag to rotate · Scroll to zoom</div>
+</div>
+
+<!-- Globe toggle button on the map -->
+<button id="globe-btn" onclick="toggleGlobe(true)" title="View as Globe" style="position:fixed;bottom:60px;right:16px;z-index:800;background:#1B2A4A;color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.3);">🌍</button>
 
 <script>
 const REGION_COLORS = {
@@ -2065,6 +2074,54 @@ if (mobileFilters) {
     const dy = touchStartY - e.changedTouches[0].clientY;
     if (dy > 40) mobileFilters.removeAttribute('open'); // swipe up > 40px closes menu
   }, { passive: true });
+}
+
+// ── GLOBE VIEW ─────────────────────────────────────────────
+let globeInstance = null;
+
+function toggleGlobe(show) {
+  const container = document.getElementById('globe-container');
+  container.style.display = show ? 'block' : 'none';
+
+  if (show && !globeInstance) {
+    // Build points from PROJECTS
+    const points = PROJECTS.map(p => ({
+      lat: p.lat,
+      lng: p.lng,
+      name: p.name,
+      org: ORGS[p.org]?.name || p.org,
+      region: p.region,
+      color: REGION_COLORS[p.region] || '#6366F1',
+      size: 0.6
+    }));
+
+    globeInstance = Globe()(document.getElementById('globe-el'))
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
+      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
+      .pointsData(points)
+      .pointLat('lat')
+      .pointLng('lng')
+      .pointColor('color')
+      .pointAltitude(0.015)
+      .pointRadius('size')
+      .pointLabel(d => `
+        <div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-family:sans-serif;font-size:0.8rem;max-width:200px;pointer-events:none;">
+          <div style="font-weight:700;margin-bottom:3px;">${d.name}</div>
+          <div style="opacity:0.8">${d.org}</div>
+          <div style="opacity:0.6;font-size:0.72rem;margin-top:2px;">${d.region}</div>
+        </div>
+      `)
+      .onPointClick(d => {
+        // Close globe and zoom to that pin on the flat map
+        toggleGlobe(false);
+        map.setView([d.lat, d.lng], 5);
+      });
+
+    // Auto-rotate
+    globeInstance.controls().autoRotate = true;
+    globeInstance.controls().autoRotateSpeed = 0.6;
+  }
 }
 </script>
 
