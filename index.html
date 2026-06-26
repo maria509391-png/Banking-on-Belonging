@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="https://unpkg.com/globe.gl@2.31.1/dist/globe.gl.min.js"></script>
+  <script src="https://unpkg.com/globe.gl@2.46.1/dist/globe.gl.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -2084,43 +2084,36 @@ function toggleGlobe(show) {
   container.style.display = show ? 'block' : 'none';
 
   if (show && !globeInstance) {
-    // Build points from PROJECTS
+    // Detect correct global export (Globe or GlobeGL)
+    const GlobeFn = window.Globe || window.GlobeGL || window['globe.gl'];
+    if (!GlobeFn) {
+      document.getElementById('globe-el').innerHTML = '<div style="color:#fff;text-align:center;padding-top:40vh;font-size:1.1rem;">Globe failed to load. Please refresh and try again.</div>';
+      return;
+    }
+
     const points = PROJECTS.map(p => ({
-      lat: p.lat,
-      lng: p.lng,
+      lat: p.lat, lng: p.lng,
       name: p.name,
       org: ORGS[p.org]?.name || p.org,
       region: p.region,
       color: REGION_COLORS[p.region] || '#6366F1',
-      size: 0.6
+      size: 0.5
     }));
 
-    globeInstance = Globe()(document.getElementById('globe-el'))
+    const el = document.getElementById('globe-el');
+    globeInstance = GlobeFn()(el)
       .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
       .pointsData(points)
-      .pointLat('lat')
-      .pointLng('lng')
+      .pointLat('lat').pointLng('lng')
       .pointColor('color')
-      .pointAltitude(0.015)
+      .pointAltitude(0.02)
       .pointRadius('size')
-      .pointLabel(d => `
-        <div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-family:sans-serif;font-size:0.8rem;max-width:200px;pointer-events:none;">
-          <div style="font-weight:700;margin-bottom:3px;">${d.name}</div>
-          <div style="opacity:0.8">${d.org}</div>
-          <div style="opacity:0.6;font-size:0.72rem;margin-top:2px;">${d.region}</div>
-        </div>
-      `)
-      .onPointClick(d => {
-        // Close globe and zoom to that pin on the flat map
-        toggleGlobe(false);
-        map.setView([d.lat, d.lng], 5);
-      });
+      .pointLabel(d => `<div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;max-width:200px"><b>${d.name}</b><br/><span style="opacity:0.8">${d.org}</span><br/><span style="opacity:0.6;font-size:0.72rem">${d.region}</span></div>`)
+      .onPointClick(d => { toggleGlobe(false); map.setView([d.lat, d.lng], 5); });
 
-    // Auto-rotate
     globeInstance.controls().autoRotate = true;
-    globeInstance.controls().autoRotateSpeed = 0.6;
+    globeInstance.controls().autoRotateSpeed = 0.5;
   }
 }
 </script>
