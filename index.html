@@ -1236,11 +1236,6 @@ function zoomToCountry(q) {
   // Zoom to country
   map.fitBounds(searchHighlightLayer.getBounds(), { padding: [40, 40], maxZoom: 7 });
 
-  // Fade out highlight after 3 seconds
-  setTimeout(() => {
-    if (searchHighlightLayer) { map.removeLayer(searchHighlightLayer); searchHighlightLayer = null; }
-  }, 3000);
-
   return true;
 }
 
