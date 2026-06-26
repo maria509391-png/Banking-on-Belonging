@@ -953,7 +953,7 @@
 </div>
 
 <div id="map"></div>
-<div id="globe-container" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0f1e;z-index:999;">
+<div id="globe-container" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#1B2A4A;z-index:999;">
   <div id="globe-el" style="width:100%;height:100%;"></div>
   <button onclick="toggleGlobe(false)" style="position:absolute;top:20px;right:20px;background:#1B2A4A;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:0.9rem;cursor:pointer;z-index:1000;font-weight:600;">✕ Back to Map</button>
   <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:0.85rem;opacity:0.6;pointer-events:none;">Drag to rotate · Scroll to zoom</div>
@@ -2101,19 +2101,52 @@ function toggleGlobe(show) {
     }));
 
     const el = document.getElementById('globe-el');
-    globeInstance = GlobeFn()(el)
-      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .backgroundImageUrl('https://unpkg.com/three-globe/example/img/night-sky.png')
-      .pointsData(points)
-      .pointLat('lat').pointLng('lng')
-      .pointColor('color')
-      .pointAltitude(0.02)
-      .pointRadius('size')
-      .pointLabel(d => `<div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;max-width:200px"><b>${d.name}</b><br/><span style="opacity:0.8">${d.org}</span><br/><span style="opacity:0.6;font-size:0.72rem">${d.region}</span></div>`)
-      .onPointClick(d => { toggleGlobe(false); map.setView([d.lat, d.lng], 5); });
 
-    globeInstance.controls().autoRotate = true;
-    globeInstance.controls().autoRotateSpeed = 0.5;
+    // Build globe with white countries on blue ocean
+    const initGlobe = (geoData) => {
+      globeInstance = GlobeFn()(el)
+        .backgroundColor('#1B2A4A')          // navy blue background (space)
+        .showGraticules(false)
+        .showAtmosphere(true)
+        .atmosphereColor('#6fa8dc')
+        .atmosphereAltitude(0.15)
+        // Ocean = white globe base
+        .globeMaterial((() => {
+          const mat = new GlobeFn.ThreeGlobe ? undefined : undefined; return mat; })())
+        // Countries as white polygons
+        .polygonsData(geoData.features)
+        .polygonCapColor(() => '#ffffff')
+        .polygonSideColor(() => '#e2e8f0')
+        .polygonStrokeColor(() => '#94a3b8')
+        .polygonAltitude(0.005)
+        // Project pins
+        .pointsData(points)
+        .pointLat('lat').pointLng('lng')
+        .pointColor('color')
+        .pointAltitude(0.02)
+        .pointRadius('size')
+        .pointLabel(d => `<div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem;max-width:200px"><b>${d.name}</b><br/><span style="opacity:0.8">${d.org}</span><br/><span style="opacity:0.6;font-size:0.72rem">${d.region}</span></div>`)
+        .onPointClick(d => { toggleGlobe(false); map.setView([d.lat, d.lng], 5); });
+
+      // Set globe base color to white (for oceans)
+      globeInstance.globeMaterial().color.set('#ffffff');
+
+      globeInstance.controls().autoRotate = true;
+      globeInstance.controls().autoRotateSpeed = 0.5;
+    };
+
+    getWorldGeoJSON().then(initGlobe).catch(() => {
+      // Fallback: no country polygons, just blue marble
+      globeInstance = GlobeFn()(el)
+        .backgroundColor('#1B2A4A')
+        .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+        .pointsData(points).pointLat('lat').pointLng('lng')
+        .pointColor('color').pointAltitude(0.02).pointRadius('size')
+        .pointLabel(d => `<div style="background:#1B2A4A;color:#fff;padding:8px 12px;border-radius:8px;font-size:0.8rem"><b>${d.name}</b></div>`)
+        .onPointClick(d => { toggleGlobe(false); map.setView([d.lat, d.lng], 5); });
+      globeInstance.controls().autoRotate = true;
+      globeInstance.controls().autoRotateSpeed = 0.5;
+    });
   }
 }
 </script>
